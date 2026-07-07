@@ -1,0 +1,594 @@
+:root{
+    --cream:#FBF3E6;
+    --paper:#FFFCF6;
+    --plum:#3C1236;
+    --plum-ink:#2A0E26;
+    --berry:#8A2D6E;
+    --berry-deep:#5E1E52;
+    --lime:#7CB342;
+    --lime-deep:#5C8A2E;
+    --gold:#F4B23E;
+    --gold-deep:#D99420;
+    --line: rgba(60,18,54,0.12);
+    --shadow: 0 12px 30px rgba(60,18,54,0.16);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--cream);
+    color:var(--plum-ink);
+    font-family:'Nunito Sans', sans-serif;
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Baloo 2', sans-serif;
+    color:var(--plum);
+    line-height:1.05;
+  }
+
+  h1.texto-inicio{
+	text-align: center;
+	
+  }
+
+#monte {
+  background-color: #F3E8EF !important; /* Aquela cor roxa suave que vinha nos combos */
+  padding-top: 60px !important;
+  padding-bottom: 96px !important;
+}
+
+  a{color:inherit;}
+  img{max-width:100%; display:block;}
+  .wrap{max-width:1120px; margin:0 auto; padding:0 24px;}
+  button{font-family:inherit; cursor:pointer; border:none;}
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(251,243,230,0.96);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .header-inner{
+    position:relative;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:18px;
+    padding:12px 24px;
+    max-width:1120px; margin:0 auto;
+  }
+  .brand{display:flex; align-items:center; gap:10px; flex-shrink:0;}
+  .brand img{height:44px; width:auto;}
+  .brand span{font-family:'Baloo 2'; font-weight:700; font-size:1.05rem; color:var(--berry-deep); display:none;}
+  .main-nav{
+    display:flex; align-items:center; gap:4px;
+    flex:1; justify-content:center;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .main-nav::-webkit-scrollbar{display:none;}
+  .main-nav a{
+    font-family:'Baloo 2'; font-weight:700; font-size:0.92rem;
+    color:var(--plum); text-decoration:none;
+    padding:9px 16px; border-radius:100px;
+    white-space:nowrap;
+    transition:background .15s ease, color .15s ease;
+  }
+  .main-nav a:hover{background:rgba(138,45,110,0.1); color:var(--berry-deep);}
+  .header-cta{
+    background:var(--lime);
+    color:#fff;
+    font-weight:800;
+    font-family:'Baloo 2';
+    padding:10px 18px;
+    border-radius:100px;
+    font-size:0.92rem;
+    letter-spacing:0.2px;
+    box-shadow:0 4px 14px rgba(124,179,66,0.4);
+    transition:transform .15s ease;
+    display:flex; align-items:center; gap:8px;
+    text-decoration:none;
+    flex-shrink:0;
+  }
+  .header-cta:hover{transform:translateY(-2px);}
+
+  .menu-toggle{
+    display:none;
+    width:44px; height:44px;
+    background:transparent;
+    border-radius:12px;
+    align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .menu-toggle:hover{background:rgba(60,18,54,0.06);}
+  .menu-toggle svg{width:24px; height:24px; position:absolute; transition:opacity .25s ease, transform .3s cubic-bezier(.4,0,.2,1);}
+  .menu-toggle{position:relative;}
+  .menu-toggle .icon-close{opacity:0; transform:rotate(-45deg) scale(0.7);}
+  .menu-toggle .icon-open{opacity:1; transform:rotate(0) scale(1);}
+  header.nav-open .menu-toggle .icon-open{opacity:0; transform:rotate(45deg) scale(0.7);}
+  header.nav-open .menu-toggle .icon-close{opacity:1; transform:rotate(0) scale(1);}
+
+  @media (max-width:820px){
+    .menu-toggle{display:flex;}
+    .main-nav{
+      display:flex;
+      position:absolute; top:100%; left:0; right:0;
+      flex-direction:column; align-items:stretch;
+      background:var(--paper);
+      border-bottom:1px solid var(--line);
+      box-shadow:0 16px 30px rgba(60,18,54,0.12);
+      padding:0 20px;
+      gap:2px;
+      max-height:0;
+      opacity:0;
+      overflow:hidden;
+      pointer-events:none;
+      transform:translateY(-6px);
+      transition:max-height .38s cubic-bezier(.4,0,.2,1), opacity .28s ease, transform .28s ease, padding .38s ease;
+    }
+    header.nav-open .main-nav{
+      max-height:400px;
+      opacity:1;
+      pointer-events:auto;
+      transform:translateY(0);
+      padding:10px 20px 16px;
+    }
+    .main-nav a{
+      padding:13px 14px; font-size:1rem;
+      border-radius:12px;
+      text-align:left;
+    }
+    .header-cta{padding:10px 14px; font-size:0.85rem;}
+    .header-cta span.cta-text{display:none;}
+    .header-inner{gap:10px;}
+  }
+  @media (min-width:821px){
+    .menu-toggle{display:none;}
+  }
+
+  /* ---------- Botão Voltar ao Topo ---------- */
+#back-to-top {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 48px;
+  height: 48px;
+  background-color: var(--lime); /* Usa o roxo lindo da sua identidade */
+  color: #fff;
+  font-size: 1.2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(60, 18, 54, 0.3);
+  z-index: 99;
+  text-decoration: none; /* Remove o sublinhado de link */
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+#back-to-top:hover {
+    background:var(--gold-deep);
+  transform: translateY(-3px); /* Dá um pulinho charmoso ao passar o mouse */
+}
+
+/* Ajuste para telas pequenas de celular */
+@media (max-width: 480px) {
+  #back-to-top {
+    bottom: 16px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+  }
+}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative;
+    min-height:88vh;
+    display:flex;
+    align-items:center;
+    overflow:hidden;
+    background:var(--cream);
+    padding:56px 0;
+  }
+  .hero-bg{
+    position:absolute; inset:0;
+    background-size:cover;
+	background-image: url(img/copo_nutella.jpeg);
+	background-position: 70%;
+    filter:saturate(1.08) brightness(1.02);
+  }
+  .hero-scrim{
+    position:absolute; inset:0;
+    background:linear-gradient(90deg, rgba(251,243,230,0.4) 0%, rgba(251,243,230,0.08) 40%, rgba(251,243,230,0.02) 100%);
+  }
+  .hero-content{
+    position:relative; z-index:2;
+    max-width:1120px; margin:0 auto; padding:0 24px;
+    width:100%;
+  }
+  .hero-card{
+    background:rgba(255,252,246,0.94);
+    backdrop-filter:blur(6px);
+    border-radius:28px;
+    padding:48px 44px;
+    max-width:640px;
+    box-shadow:0 20px 50px rgba(60,18,54,0.18);
+    border:1px solid rgba(255,255,255,0.6);
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(244,178,62,0.18);
+    border:1px solid rgba(217,148,32,0.4);
+    color:var(--gold-deep);
+    font-family:'Baloo 2'; font-weight:600;
+    font-size:0.8rem; letter-spacing:0.08em; text-transform:uppercase;
+    padding:7px 16px; border-radius:100px;
+    margin-bottom:24px;
+  }
+  .hero h1{
+    color:var(--plum);
+    font-size:clamp(2.2rem, 4.6vw, 3.4rem);
+    font-weight:800;
+    max-width:12ch;
+    text-wrap:balance;
+  }
+  .hero h1 em{
+    font-style:normal;
+    color:var(--berry-deep);
+  }
+  .hero p.lede{
+    color:rgba(42,14,38,0.75);
+    font-size:1.1rem;
+    max-width:46ch;
+    margin-top:20px;
+    font-weight:400;
+  }
+  .hero-actions{
+    display:flex; flex-wrap:wrap; gap:14px;
+    margin-top:34px;
+  }
+  .btn-primary{
+    background:var(--lime);
+    color:#fff; font-family:'Baloo 2'; font-weight:700;
+    padding:16px 30px; border-radius:100px; font-size:1rem;
+    box-shadow:0 10px 26px rgba(124,179,66,0.4);
+    display:inline-flex; align-items:center; gap:10px;
+    text-decoration:none;
+    transition:transform .15s ease;
+  }
+  .btn-primary:hover{transform:translateY(-2px);}
+  .btn-ghost{
+    background:#fff;
+    border:1.5px solid var(--line)!important;
+    color:var(--plum); font-family:'Baloo 2'; font-weight:700;
+    padding:16px 28px; border-radius:100px; font-size:1rem;
+    display:inline-flex; align-items:center; gap:10px;
+    text-decoration:none;
+  }
+  .hero-meta{
+    display:flex; flex-wrap:wrap; gap:24px;
+    margin-top:38px;
+    padding-top:24px;
+    border-top:1px solid var(--line);
+  }
+  .hero-meta div{color:rgba(42,14,38,0.7); font-size:0.88rem;}
+  .hero-meta strong{
+    display:block; font-family:'Baloo 2'; color:var(--berry-deep); font-size:1rem; margin-bottom:2px;
+  }
+  @media (max-width:640px){
+    /* 1. Deixa a caixinha branca menor, mais estreita e centraliza ela no celular */
+    .hero-card {
+      padding: 24px 20px !important; 
+      max-width: 90% !important;     
+      margin: 0 auto !important;     
+      text-align: center !important; 
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important; /* Força todos os blocos internos a se alinharem no centro */
+    }
+
+    /* 2. Centraliza a tag dourada da nota */
+    .hero-card .eyebrow {
+      margin: 0 auto 16px auto !important;
+      display: inline-flex !important;
+    }
+
+    /* 3. Força o título a quebrar o limite de caracteres do PC e centralizar */
+    .hero h1 {
+      max-width: 100% !important;   /* Libera a largura para não esmagar o texto na esquerda */
+      text-align: center !important;
+      width: 100% !important;
+    }
+
+    /* 4. Força o texto descritivo a centralizar */
+    .hero p.lede {
+      max-width: 100% !important;
+      text-align: center !important;
+      margin: 16px auto 0 auto !important; /* Centraliza o bloco do parágrafo */
+    }
+
+    /* 5. Centraliza os botões e faz eles ocuparem a largura total no mobile */
+    .hero-actions {
+      justify-content: center !important;
+      gap: 10px !important;
+      width: 100% !important;
+    }
+    
+    .btn-primary, .btn-ghost {
+      width: 100% !important;        
+      justify-content: center !important;
+      padding: 12px 20px !important; 
+      font-size: 0.95rem !important;
+    }
+
+    /* 6. Alinha e centraliza o bloco de endereço e contato */
+    .hero-meta {
+      text-align: center !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 16px !important;
+      width: 100% !important;
+    }
+    
+    .hero-meta div {
+      max-width: 100% !important;
+      text-align: center !important;
+    }
+  }
+
+  /* ---------- Marquee ---------- */
+  .marquee{
+    background:var(--gold);
+    color:var(--plum-ink);
+    font-family:'Baloo 2'; font-weight:700;
+    padding:13px 0;
+    overflow:hidden;
+    white-space:nowrap;
+    border-top:2px solid var(--plum-ink);
+    border-bottom:2px solid var(--plum-ink);
+  }
+  .marquee-track{
+    display:inline-flex;
+    animation:scroll 26s linear infinite;
+  }
+  .marquee-track span{
+    padding:0 28px;
+    font-size:0.95rem;
+    letter-spacing:0.02em;
+  }
+  @keyframes scroll{
+    from{transform:translateX(0);}
+    to{transform:translateX(-50%);}
+  }
+
+  /* ---------- Section generic ---------- */
+  section{padding:96px 0;}
+  .section-head{max-width:640px; margin-bottom:52px;}
+  .kicker{
+    font-family:'Baloo 2'; font-weight:700; color:var(--lime-deep);
+    text-transform:uppercase; letter-spacing:0.08em; font-size:0.82rem;
+    margin-bottom:14px; display:block;
+  }
+  .section-head h2{font-size:clamp(2rem, 4vw, 2.7rem); font-weight:800;}
+  .section-head p{margin-top:14px; font-size:1.05rem; color:rgba(42,14,38,0.72); max-width:52ch;}
+
+/* ---------- Gallery (Carrossel Mobile Ajustado) ---------- */
+.gallery {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 16px;
+  overflow-x: auto !important;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 10px 4px 24px 4px;
+  columns: auto !important;
+}
+
+.gallery::-webkit-scrollbar {
+  display: none;
+}
+
+.gallery figure {
+  flex: 0 0 85% !important;
+  min-width: 85% !important;
+  scroll-snap-align: start;
+  margin: 0 !important;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background: #fff;
+}
+
+.gallery img {
+  width: 100%;
+  height: 520px; /* Aumentamos de 250px para 380px para mostrar muito mais o copo/barca */
+  object-fit: cover; /* Mantém a imagem sem distorcer */
+  object-position: center; /* Garante que o centro da foto seja o foco principal */
+  display: block;
+}
+
+/* --- Regra Importante para o Computador --- */
+/* Isso garante que no PC todas voltem a ficar alinhadas na grade bonitinho, sem estourar a tela */
+@media (min-width: 768px) {
+  .gallery figure.caixa-media,
+  .gallery figure.caixa-grande,
+  .gallery figure.caixa-gigante {
+    flex: none !important;
+    min-width: 0 !important;
+  }
+}
+
+  .gallery figure {
+    flex: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .gallery img {
+    height: 320px; /* Ajuste sutil na altura do PC também para acompanhar o visual */
+  }
+
+
+  /* ---------- Builder ---------- */
+  .builder{background:var(--paper); border-radius:28px; box-shadow:var(--shadow); overflow:hidden; border:1px solid var(--line);}
+  .builder-head{
+    background:var(--plum-ink); color:#FFFCF6; padding:30px 34px;
+    display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap;
+  }
+  .builder-head h3{color:#fff; font-size:1.5rem;}
+  .builder-head p{color:rgba(255,252,246,0.68); font-size:0.9rem; margin-top:4px;}
+  .builder-body{padding:34px;}
+  .cat-block{margin-bottom:30px;}
+  .cat-block:last-child{margin-bottom:0;}
+  .cat-title{
+    font-family:'Baloo 2'; font-weight:700; color:var(--berry-deep);
+    font-size:1.02rem; margin-bottom:14px; padding-bottom:8px; border-bottom:2px solid var(--gold);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .cat-hint{font-family:'Nunito Sans'; font-weight:600; font-size:0.72rem; color:rgba(42,14,38,0.45); text-transform:uppercase; letter-spacing:0.04em;}
+  .opt-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:10px;
+  }
+  .opt{
+    display:flex; align-items:center; gap:10px;
+    border:1.5px solid var(--line); border-radius:12px; padding:10px 12px;
+    font-size:0.88rem; transition:border-color .15s ease, background .15s ease;
+    background:#fff;
+  }
+  .opt:has(input:checked){border-color:var(--lime); background:rgba(124,179,66,0.08);}
+  .opt input{accent-color:var(--lime-deep); width:17px; height:17px; flex-shrink:0;}
+  .opt label{display:flex; justify-content:space-between; width:100%; gap:8px; cursor:pointer;}
+  .opt .price{color:var(--berry-deep); font-weight:700; white-space:nowrap;}
+  .opt-name{color:var(--plum-ink);}
+
+  .radio-row{display:flex; flex-wrap:wrap; gap:10px;}
+  .radio-chip{
+    border:1.5px solid var(--line); border-radius:100px; padding:9px 16px; font-size:0.88rem;
+    background:#fff; display:flex; align-items:center; gap:8px;
+  }
+  .radio-chip:has(input:checked){border-color:var(--berry); background:rgba(138,45,110,0.08);}
+  .radio-chip input{accent-color:var(--berry-deep);}
+  .radio-chip label{display:flex; gap:8px; align-items:center; cursor:pointer;}
+  .radio-chip .price{font-weight:700; color:var(--berry-deep);}
+
+  /* smooth reveal (sabor -> tamanho) */
+  .reveal{
+    max-height:0;
+    opacity:0;
+    overflow:hidden;
+    pointer-events:none;
+    transform:translateY(-8px);
+    transition:max-height .5s cubic-bezier(.4,0,.2,1), opacity .35s ease, transform .35s ease, margin .5s ease;
+    margin-bottom:0;
+  }
+  .reveal.reveal-open{
+    max-height:600px;
+    opacity:1;
+    pointer-events:auto;
+    transform:translateY(0);
+    margin-bottom:30px;
+  }
+
+  .add-cup-block{
+    background:var(--cream); border-radius:18px; padding:20px 24px;
+    border:1.5px dashed var(--line);
+  }
+  .add-cup-row{
+    display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
+  }
+  .add-cup-info{display:flex; flex-direction:column; gap:2px;}
+  .add-cup-info .label{font-size:0.78rem; color:rgba(42,14,38,0.55); text-transform:uppercase; letter-spacing:0.05em; font-family:'Baloo 2'; font-weight:600;}
+  .add-cup-info .val{font-family:'Baloo 2'; font-weight:800; font-size:1.4rem; color:var(--berry-deep);}
+  .btn-add-cup{
+    background:var(--berry); color:#fff; font-family:'Baloo 2'; font-weight:800;
+    padding:14px 26px; border-radius:100px; font-size:0.95rem;
+    box-shadow:0 8px 20px rgba(138,45,110,0.35);
+    transition:transform .15s ease, opacity .15s ease;
+  }
+  .btn-add-cup:hover{transform:translateY(-2px);}
+  .btn-add-cup:disabled{opacity:0.45; cursor:not-allowed; transform:none; box-shadow:none;}
+
+  #cart-block{display:none;}
+  #cart-block.has-items{display:block;}
+  .cart-list{display:flex; flex-direction:column; gap:10px;}
+  .cart-item{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:14px;
+    background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:14px 16px;
+  }
+  .cart-item-info{flex:1; min-width:0;}
+  .cart-item-title{font-family:'Baloo 2'; font-weight:700; color:var(--plum); margin-bottom:4px;}
+  .cart-item-parts{font-size:0.82rem; color:rgba(42,14,38,0.65); line-height:1.45;}
+  .cart-item-side{display:flex; align-items:center; gap:10px; flex-shrink:0;}
+  .cart-item-price{font-family:'Baloo 2'; font-weight:800; color:var(--berry-deep); white-space:nowrap;}
+  .cart-item-remove{
+    background:transparent; color:rgba(42,14,38,0.4); font-size:1.15rem; line-height:1;
+    padding:6px 9px; border-radius:8px; transition:background .15s ease, color .15s ease;
+  }
+  .cart-item-remove:hover{background:rgba(138,45,110,0.1); color:var(--berry-deep);}
+
+  .field-row{display:flex; flex-wrap:wrap; gap:16px; margin-top:16px;}
+  .field{flex:1; min-width:220px; display:flex; flex-direction:column; gap:6px;}
+  .field label{font-family:'Baloo 2'; font-weight:700; font-size:0.85rem; color:var(--plum);}
+  .field input{
+    border:1.5px solid var(--line); border-radius:12px; padding:11px 14px;
+    font-family:inherit; font-size:0.92rem; background:#fff; color:var(--plum-ink);
+    transition:border-color .15s ease;
+  }
+  .field input:focus{outline:none; border-color:var(--berry);}
+  #address-field.hidden{display:none;}
+
+  .builder-summary{
+    background:var(--cream); border-top:2px dashed var(--line);
+    padding:28px 34px; display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap;
+  }
+  .summary-total{font-family:'Baloo 2';}
+  .summary-total .label{font-size:0.8rem; color:rgba(42,14,38,0.6); text-transform:uppercase; letter-spacing:0.06em;}
+  .summary-total .val{font-size:2.2rem; font-weight:800; color:var(--berry-deep);}
+  #send-order{
+    background:var(--lime); color:#fff; font-family:'Baloo 2'; font-weight:700;
+    padding:17px 32px; border-radius:100px; font-size:1rem;
+    display:inline-flex; align-items:center; gap:10px; text-decoration:none;
+    box-shadow:0 10px 24px rgba(124,179,66,0.4);
+  }
+  #send-order:disabled{opacity:0.5; box-shadow:none; cursor:not-allowed;}
+
+  /* ---------- Location ---------- */
+  .loc-wrap{display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center;}
+  @media (max-width:860px){.loc-wrap{grid-template-columns:1fr;}}
+  .loc-card{
+    background:var(--paper); border-radius:22px; padding:34px; box-shadow:var(--shadow); border:1px solid var(--line);
+  }
+  .loc-row{display:flex; gap:16px; padding:16px 0; border-bottom:1px solid var(--line);}
+  .loc-row:last-child{border-bottom:none;}
+  .loc-row .ic{
+    width:42px; height:42px; border-radius:12px; background:rgba(124,179,66,0.14);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:1.2rem;
+  }
+  .loc-row strong{font-family:'Baloo 2'; display:block; color:var(--plum); font-size:0.98rem;}
+  .loc-row span{color:rgba(42,14,38,0.68); font-size:0.9rem;}
+  .map-frame{border-radius:22px; overflow:hidden; box-shadow:var(--shadow); border:1px solid var(--line); height:420px;}
+  .map-frame iframe{width:100%; height:100%; border:0;}
+
+  /* ---------- Footer ---------- */
+  footer{background:var(--berry-deep); color:rgba(255,252,246,0.75); padding:56px 0 30px;}
+  .foot-top{display:flex; justify-content:space-between; align-items:flex-start; gap:24px; flex-wrap:wrap; padding-bottom:36px; border-bottom:1px solid rgba(255,252,246,0.14);}
+  .foot-brand{display:flex; align-items:center; gap:12px;}
+  .foot-brand img{height:40px; border-radius:8px;}
+  .foot-brand strong{color:#fff; font-family:'Baloo 2'; font-size:1.1rem;}
+  .foot-social{display:flex; gap:12px;}
+  .foot-social a{
+    width:42px; height:42px; border-radius:50%; background:rgba(255,252,246,0.1);
+    display:flex; align-items:center; justify-content:center; text-decoration:none; color:#fff; font-size:1.1rem;
+  }
+  .foot-bottom{padding-top:22px; font-size:0.82rem; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;}
+
+  ::selection{background:var(--gold); color:var(--plum-ink);}
+  @media (prefers-reduced-motion:reduce){
+    .marquee-track{animation:none;}
+    html{scroll-behavior:auto;}
+  }
+  a:focus-visible, button:focus-visible, input:focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
