@@ -15,7 +15,7 @@ const MENU = {
     {name:'Uva',price:2.50},{name:'Morango',price:3.50},
   ],
   Coberturas:[
-    {name:'Chocolate',price:2.00},{name:'Morango',price:2.00},{name:'Caramelo',price:2.00},{name:'Mel',price:3.00},
+    {name:'Cobertura chocolate',price:2.00},{name:'Cobertura morango',price:2.00},{name:'Cobertura caramelo',price:2.00},{name:'Mel',price:3.00},
   ],
   'Combinações':[
     {name:'Leite condensado',price:2.50},{name:'Leite em pó',price:3.00},{name:'Coco ralado',price:2.00},
