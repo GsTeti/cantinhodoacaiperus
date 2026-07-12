@@ -173,6 +173,14 @@ function updateFloatPrice(){
     subtotalPassed = subRect.top <= 90; // 90px ≈ altura do cabeçalho fixo
   }
 
+  // já apareceu a pergunta "quer montar mais um?" — o subtotal real já está visível na tela
+  const promptVisible = cupPromptWrapper && cupPromptWrapper.classList.contains('reveal-open');
+
+  floatPriceVal.textContent = fmt(currentCupTotal);
+  const shouldShow = inMonte && !subtotalPassed && !promptVisible && currentCupTotal > 0;
+  floatPrice.classList.toggle('show', shouldShow);
+}
+
   floatPriceVal.textContent = fmt(currentCupTotal);
   const shouldShow = inMonte && !subtotalPassed && currentCupTotal > 0;
   floatPrice.classList.toggle('show', shouldShow);
