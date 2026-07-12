@@ -565,7 +565,7 @@ section{padding:96px 0;}
   border:1.5px dashed var(--line);
 }
 .add-cup-row{
-  display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
+  display:flex; align-items:center; justify-content:center; gap:18px; flex-wrap:wrap;
 }
 .add-cup-info{display:flex; flex-direction:column; gap:2px;}
 .add-cup-info .label{font-size:0.78rem; color:rgba(42,14,38,0.55); text-transform:uppercase; letter-spacing:0.05em; font-family:'Baloo 2'; font-weight:600;}
