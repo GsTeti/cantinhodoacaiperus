@@ -181,11 +181,6 @@ function updateFloatPrice(){
   floatPrice.classList.toggle('show', shouldShow);
 }
 
-  floatPriceVal.textContent = fmt(currentCupTotal);
-  const shouldShow = inMonte && !subtotalPassed && currentCupTotal > 0;
-  floatPrice.classList.toggle('show', shouldShow);
-}
-
 window.addEventListener('scroll', updateFloatPrice, { passive: true });
 window.addEventListener('resize', updateFloatPrice);
 
