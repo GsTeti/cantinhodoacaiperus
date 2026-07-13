@@ -59,7 +59,7 @@ const PAYMENT_METHODS = [
 ];
 
 // ⚠️ EDITE AQUI: coloque sua chave Pix real (CPF/CNPJ, e-mail, telefone ou chave aleatória)
-const PIX_KEY = '11 91329-9252';
+const PIX_KEY = '1191329-9252';
 
 const fmt = v => 'R$ ' + v.toFixed(2).replace('.', ',');
 
