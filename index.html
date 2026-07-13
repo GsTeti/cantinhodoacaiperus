@@ -11,53 +11,32 @@
 </head>
 <body>
 
-<header id="site-header">
-  <div class="header-inner">
-    <div class="brand">
-      <img src="img/logo.png" alt="logo">
+<section class="store-hero">
+<div class="store-hero-bg" style="background-image:url('img/barca.jpeg'); background-position: 50% 70%;"></div>
+</section>
+
+<section class="store-info-bar">
+  <div class="wrap store-info-wrap">
+    <div class="store-logo-circle">
+      <img src="img/logo.png" alt="logo Cantinho do Açaí Perus">
     </div>
-    <nav class="main-nav" id="main-nav">
-      <a href="#galeria">Fotos</a>
-      <a href="#monte">Cardápio</a>
-      <a href="#local">Localização</a>
-    </nav>
-    <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="main-nav">
-      <svg class="icon-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
-    </button>
-  </div>
-</header>
-
-<div class="marquee">
-  <div class="marquee-track">
-    <span>🍓 AÇAÍ PREMIUM E CREMOSO</span><span>🥭 FRUTAS FRESCAS</span><span>🍫 RECHEIOS IRRESISTÍVEIS</span><span>🛵 ENTREGA RÁPIDA EM PERUS</span><span>📲 PEDIDO 100% PELO WHATSAPP</span>
-    <span>🍓 AÇAÍ PREMIUM E CREMOSO</span><span>🥭 FRUTAS FRESCAS TODO DIA</span><span>🍫 RECHEIOS IRRESISTÍVEIS</span><span>🛵 ENTREGA RÁPIDA EM PERUS</span><span>📲 PEDIDO 100% PELO WHATSAPP</span>
-  </div>
-</div>
-
-<section>
-
-  <div class="hero-scrim"></div>
-  <div class="hero-content">
-    <div class="hero-card">
-      <span class="eyebrow">★ 4,9 de nota dos clientes</span>
-      <h1 class="texto-inicio">Açaí cremoso de verdade, <em>montado no capricho</em></h1>
-      <div class="hero-actions">
-        <a class="btn-primary" href="#monte">🥣 Montar meu açaí</a>
+    <div class="store-info-main">
+      <h1 class="store-name">Cantinho do Açaí Perus</h1>
+      <div class="store-status-row">
+        <span class="status-badge status-open" id="store-status-badge">🟢 Aberto agora</span>
+        <button type="button" class="store-details-btn" id="open-store-info">ℹ️ Horários, endereço e mais</button>
       </div>
-    </div>
-  <br><br>
-  <div class="wrap" id="galeria">
-    <div class="section-head">
-      <h1>Do nosso balcão pro seu copo</h1>
-    </div>
-    <div class="gallery">
-      <figure><img src="img/copo_marac_nut.jpeg" alt=""></figure>
-      <figure><img src="img/tigela.jpeg" alt=""></figure>
-      <figure><img src="img/copo_nutella.jpeg" alt=""></figure>
-      <figure><img src="img/copo_morango.jpeg" alt=""></figure>
-      <figure><img src="img/marmita.jpeg" alt=""></figure>
-      <figure><img src="img/copo_mousse.jpeg" alt=""></figure>
+      <div class="store-meta-row">
+        <div class="store-meta-item">
+          <span class="meta-label">Taxa de entrega</span>
+          <!-- ⚠️ Mantenha esse valor igual ao "data-fee" do delivery no script.js -->
+          <span class="meta-val">+ R$ 7,00</span>
+        </div>
+        <div class="store-meta-item">
+          <span class="meta-label">Avaliação</span>
+          <span class="meta-val">★ 5,0</span>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -78,6 +57,13 @@
       </div>
       <div class="builder-body">
 
+        <div class="cat-block search-block">
+          <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="menu-search" placeholder="Já sabe o que quer? Busque um ingrediente (ex: Nutella, morango...)">
+          </div>
+        </div>
+
         <div class="cat-block">
           <div class="cat-title">Escolha o sabor <span class="cat-hint">obrigatório</span></div>
           <div class="radio-row" id="flavor-options"></div>
@@ -94,6 +80,10 @@
           <div class="cat-title">Frutas</div>
           <div class="opt-grid" data-cat="Frutas"></div>
         </div>
+		<div class="cat-block">
+          <div class="cat-title">Mousses & extras</div>
+          <div class="opt-grid" data-cat="Extras"></div>
+        </div>
         <div class="cat-block">
           <div class="cat-title">Coberturas</div>
           <div class="opt-grid" data-cat="Coberturas"></div>
@@ -107,13 +97,11 @@
           <div class="opt-grid" data-cat="Chocolates"></div>
         </div>
         <div class="cat-block">
-          <div class="cat-title">Mousses & extras</div>
-          <div class="opt-grid" data-cat="Extras"></div>
-        </div>
-        <div class="cat-block">
           <div class="cat-title">Bebidas</div>
           <div class="opt-grid" data-cat="Bebidas"></div>
         </div>
+
+        <p class="search-no-results" id="search-no-results">Nenhum ingrediente encontrado com esse nome.</p>
 
         <div class="cat-block add-cup-block">
           <div class="add-cup-info">
@@ -172,36 +160,36 @@
                 <span class="pix-key" id="pix-key-display"></span>
                 <button type="button" id="copy-pix-btn" class="btn-copy-pix">📋 Copiar</button>
               </div>
+			  <p class="pix-box-note">Nome: Keila Cristina Gabriel Silva</p>
               <p class="pix-box-note">Pague por Pix e envie o comprovante pelo WhatsApp junto com o pedido.</p>
             </div>
           </div>
 
-		  <div class="reveal" id="troco-info-wrapper">
-  <div class="pix-box">
-    <div class="pix-box-label">Precisa de troco?</div>
-    <div class="radio-row" id="troco-options">
-      <div class="radio-chip">
-        <label><input type="radio" name="troco-needed" value="Sim"> <span class="opt-name">Sim</span></label>
-      </div>
-      <div class="radio-chip">
-        <label><input type="radio" name="troco-needed" value="Não"> <span class="opt-name">Não</span></label>
-      </div>
-    </div>
-    <div class="reveal" id="troco-value-wrapper">
-      <div class="field" style="margin-top:14px;">
-        <label for="troco-value">Troco para quanto?</label>
-        <input type="text" id="troco-value" placeholder="Ex: 50,00">
-      </div>
-    </div>
-  </div>
-</div>
-		  
+          <div class="reveal" id="troco-info-wrapper">
+            <div class="pix-box">
+              <div class="pix-box-label">Precisa de troco?</div>
+              <div class="radio-row" id="troco-options">
+                <div class="radio-chip">
+                  <label><input type="radio" name="troco-needed" value="Sim"> <span class="opt-name">Sim</span></label>
+                </div>
+                <div class="radio-chip">
+                  <label><input type="radio" name="troco-needed" value="Não"> <span class="opt-name">Não</span></label>
+                </div>
+              </div>
+              <div class="reveal" id="troco-value-wrapper">
+                <div class="field" style="margin-top:14px;">
+                  <label for="troco-value">Troco para quanto?</label>
+                  <input type="text" id="troco-value" placeholder="Ex: 50,00">
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-		<div class="cat-block">
-  <div class="cat-title">Observações <span class="cat-hint">opcional</span></div>
-  <textarea id="customer-notes" class="notes-textarea" rows="3" placeholder="Ex: nutella no meio, cor do bis, combinação separada..."></textarea>
-</div>
+        <div class="cat-block">
+          <div class="cat-title">Observações <span class="cat-hint">opcional</span></div>
+          <textarea id="customer-notes" class="notes-textarea" rows="3" placeholder="Ex: Nutella no meio, cor do bis, combinação separada..."></textarea>
+        </div>
 
       </div>
       <div class="builder-summary">
@@ -210,38 +198,6 @@
           <div class="val" id="total-val">R$ 0,00</div>
         </div>
         <a id="send-order" href="#" target="_blank" rel="noopener">📲 Enviar pedido no WhatsApp</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="local">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="kicker">Onde estamos</span>
-      <h2>Vem provar de pertinho</h2>
-    </div>
-    <div class="loc-wrap">
-      <div class="loc-card">
-        <div class="loc-row">
-          <div class="ic">📍</div>
-          <div><strong>Endereço</strong><span>Rua Recanto dos Humildes, 108 — Conj. Hab. Recanto dos Humildes, São Paulo/SP, CEP 05209-000</span></div>
-        </div>
-        <div class="loc-row">
-          <div class="ic">📞</div>
-          <div><strong>Contato</strong><span>(11) 94936-0595 — atendimento só via WhatsApp</span></div>
-        </div>
-        <div class="loc-row">
-          <div class="ic">📷</div>
-          <div><strong>Instagram</strong><span>@cantinhodoacaiperus</span></div>
-        </div>
-        <div class="loc-row">
-          <div class="ic">🛵</div>
-          <div><strong>Delivery</strong><span>Pedidos combinados direto pelo WhatsApp</span></div>
-        </div>
-      </div>
-      <div class="map-frame">
-        <iframe src="https://www.google.com/maps?q=Rua+Recanto+dos+Humildes,+108,+S%C3%A3o+Paulo,+SP,+05209-000&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mapa Cantinho do Açaí Perus"></iframe>
       </div>
     </div>
   </div>
@@ -266,6 +222,42 @@
     </div>
   </div>
 </footer>
+
+<div class="modal-overlay" id="store-info-modal">
+  <div class="modal-box">
+    <button type="button" class="modal-close" id="close-store-info" aria-label="Fechar">✕</button>
+    <h3>Cantinho do Açaí Perus</h3>
+    <p class="modal-address">📍 Rua Recanto dos Humildes, 108 — Conj. Hab. Recanto dos Humildes, São Paulo/SP, CEP 05209-000</p>
+
+    <div class="modal-section">
+      <div class="modal-section-title">⏱️ Tempo médio de espera</div>
+      <!-- ⚠️ EDITE: valores de exemplo -->
+      <p>Delivery: 40 – 60 minutos</p>
+      <p>Retirada no balcão: 20 – 40 minutos</p>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">🕒 Horários de funcionamento</div>
+      <!-- ⚠️ EDITE: preencha com os horários reais -->
+      <div class="hours-table">
+        <div><span>Domingo</span><span>15:00 – 21:30</span></div>
+        <div><span>Segunda</span><span>15:00 – 21:30</span></div>
+        <div><span>Terça</span><span>15:00 – 21:30</span></div>
+        <div><span>Quarta</span><span>15:00 – 21:30</span></div>
+        <div><span>Quinta</span><span>15:00 – 21:30</span></div>
+        <div><span>Sexta</span><span>15:00 – 21:30</span></div>
+        <div><span>Sábado</span><span>15:00 – 21:30</span></div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">🗺️ Localização</div>
+      <div class="modal-map-frame">
+        <iframe src="https://www.google.com/maps?q=Rua+Recanto+dos+Humildes,+108,+S%C3%A3o+Paulo,+SP,+05209-000&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mapa Cantinho do Açaí Perus"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="float-price" id="float-price" aria-hidden="true">
   <span class="label">Seu copo</span>
