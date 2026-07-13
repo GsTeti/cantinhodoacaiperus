@@ -55,13 +55,11 @@ const PAYMENT_METHODS = [
   {name:'Dinheiro', emoji:'💵'},
   {name:'Cartão de Crédito', emoji:'💳'},
   {name:'Cartão de Débito', emoji:'💳'},
-  {name:'Vale Alimentação', emoji:'🍽️'},
-  {name:'Vale Refeição', emoji:'🍴'},
   {name:'Pix', emoji:'💠'},
 ];
 
 // ⚠️ EDITE AQUI: coloque sua chave Pix real (CPF/CNPJ, e-mail, telefone ou chave aleatória)
-const PIX_KEY = 'Telefone: (11) 913299252 Nome: Keila Cristina Gabriel Silva';
+const PIX_KEY = '11 949360595';
 
 const fmt = v => 'R$ ' + v.toFixed(2).replace('.', ',');
 
@@ -128,6 +126,67 @@ PAYMENT_METHODS.forEach(method => {
 });
 document.getElementById('pix-key-display').textContent = PIX_KEY;
 
+// ⚠️ Mantenha esses horários iguais aos que aparecem no modal (index.html).
+// Formato 24h "HH:MM". Se um dia for fechado, deixe open e close como null.
+const STORE_HOURS = [
+  { day:'Domingo', open:'15:00', close:'21:30' },
+  { day:'Segunda', open:'15:00', close:'21:30' },
+  { day:'Terça',   open:'15:00', close:'21:30' },
+  { day:'Quarta',  open:'15:00', close:'21:30' },
+  { day:'Quinta',  open:'15:00', close:'21:30' },
+  { day:'Sexta',   open:'15:00', close:'21:30' },
+  { day:'Sábado',  open:'15:00', close:'21:30' },
+];
+
+function updateStoreStatus(){
+  const badge = document.getElementById('store-status-badge');
+  if(!badge) return;
+
+  const now = new Date();
+  const todayHours = STORE_HOURS[now.getDay()]; // 0=Domingo ... 6=Sábado
+
+  let isOpen = false;
+  if(todayHours && todayHours.open && todayHours.close){
+    const [openH, openM] = todayHours.open.split(':').map(Number);
+    const [closeH, closeM] = todayHours.close.split(':').map(Number);
+    const openMinutes = openH * 60 + openM;
+    const closeMinutes = closeH * 60 + closeM;
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+    if(closeMinutes > openMinutes){
+      isOpen = nowMinutes >= openMinutes && nowMinutes < closeMinutes;
+    } else {
+      // horário que vira a noite (ex: 18:00 às 01:00)
+      isOpen = nowMinutes >= openMinutes || nowMinutes < closeMinutes;
+    }
+  }
+
+  badge.classList.toggle('status-open', isOpen);
+  badge.classList.toggle('status-closed', !isOpen);
+  badge.textContent = isOpen ? '🟢 Aberto agora' : '🔴 Fechado agora';
+}
+
+updateStoreStatus();
+setInterval(updateStoreStatus, 60000); // reavalia a cada 1 minuto
+
+// ---------- Efeito parallax no banner do topo ----------
+const storeHeroBg = document.querySelector('.store-hero-bg');
+const storeHeroSection = document.querySelector('.store-hero');
+
+function updateHeroParallax(){
+  if(!storeHeroBg || !storeHeroSection) return;
+  const rect = storeHeroSection.getBoundingClientRect();
+  if(rect.bottom < 0 || rect.top > window.innerHeight) return;
+  const maxOffset = rect.height * 0.12; // limite seguro dentro da sobra de 15%
+  let offset = rect.top * 0.3;
+  offset = Math.max(-maxOffset, Math.min(maxOffset, offset));
+  storeHeroBg.style.transform = `translateY(${offset}px)`;
+}
+
+window.addEventListener('scroll', updateHeroParallax, { passive:true });
+window.addEventListener('resize', updateHeroParallax);
+updateHeroParallax();
+
 const sizeWrapper = document.getElementById('size-wrapper');
 const cartBlock = document.getElementById('cart-block');
 const cartList = document.getElementById('cart-list');
@@ -159,25 +218,20 @@ const subtotalBlock = document.querySelector('.add-cup-block');
 function updateFloatPrice(){
   if(!floatPrice || !floatPriceVal) return;
 
-  // está dentro da seção do cardápio?
   let inMonte = false;
   if(monteSection){
     const monteRect = monteSection.getBoundingClientRect();
     inMonte = monteRect.top < window.innerHeight && monteRect.bottom > 0;
   }
 
-  // já passou do subtotal real do copo? (uma vez passado, fica escondido até rolar de volta pra cima)
   let subtotalPassed = false;
   if(subtotalBlock){
     const subRect = subtotalBlock.getBoundingClientRect();
-    subtotalPassed = subRect.top <= 90; // 90px ≈ altura do cabeçalho fixo
+    subtotalPassed = subRect.top <= 90;
   }
 
-  // já apareceu a pergunta "quer montar mais um?" — o subtotal real já está visível na tela
-  const promptVisible = cupPromptWrapper && cupPromptWrapper.classList.contains('reveal-open');
-
   floatPriceVal.textContent = fmt(currentCupTotal);
-  const shouldShow = inMonte && !subtotalPassed && !promptVisible && currentCupTotal > 0;
+  const shouldShow = inMonte && !subtotalPassed && currentCupTotal > 0;
   floatPrice.classList.toggle('show', shouldShow);
 }
 
@@ -460,26 +514,50 @@ recalcCurrentCup();
 renderCart();
 recalcGrandTotal();
 
-// hamburger menu
-const header = document.getElementById('site-header');
-const menuToggle = document.getElementById('menu-toggle');
-const mainNav = document.getElementById('main-nav');
-menuToggle.addEventListener('click', () => {
-  const isOpen = header.classList.toggle('nav-open');
-  menuToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-  menuToggle.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
-});
-mainNav.querySelectorAll('a').forEach(a => a.addEventListener('click', (e) => {
-  const menuWasOpen = header.classList.contains('nav-open');
-  header.classList.remove('nav-open');
-  menuToggle.setAttribute('aria-expanded', 'false');
-  menuToggle.setAttribute('aria-label', 'Abrir menu');
+// ---------- Modal "Horários, endereço e mais" ----------
+const storeInfoModal = document.getElementById('store-info-modal');
+const openStoreInfoBtn = document.getElementById('open-store-info');
+const closeStoreInfoBtn = document.getElementById('close-store-info');
 
-  if (menuWasOpen) {
-    e.preventDefault();
-    const target = document.querySelector(a.getAttribute('href'));
-    if (target) {
-      setTimeout(() => target.scrollIntoView({ behavior: 'smooth' }), 50);
-    }
-  }
-}));
+function openStoreModal(){
+  storeInfoModal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeStoreModal(){
+  storeInfoModal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+openStoreInfoBtn.addEventListener('click', openStoreModal);
+closeStoreInfoBtn.addEventListener('click', closeStoreModal);
+storeInfoModal.addEventListener('click', (e) => {
+  if(e.target === storeInfoModal) closeStoreModal();
+});
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape' && storeInfoModal.classList.contains('open')) closeStoreModal();
+});
+
+// ---------- Busca de ingredientes dentro do cardápio ----------
+const menuSearchInput = document.getElementById('menu-search');
+const searchNoResults = document.getElementById('search-no-results');
+
+menuSearchInput.addEventListener('input', () => {
+  const query = menuSearchInput.value.trim().toLowerCase();
+  let anyResultAtAll = false;
+
+  document.querySelectorAll('.opt-grid').forEach(grid => {
+    let anyVisibleInGrid = false;
+    grid.querySelectorAll('.opt').forEach(optDiv => {
+      const name = (optDiv.dataset.name || '').toLowerCase();
+      const match = !query || name.includes(query);
+      optDiv.style.display = match ? '' : 'none';
+      if(match){
+        anyVisibleInGrid = true;
+        anyResultAtAll = true;
+      }
+    });
+    const catBlock = grid.closest('.cat-block');
+    if(catBlock) catBlock.style.display = anyVisibleInGrid ? '' : 'none';
+  });
+
+  searchNoResults.classList.toggle('show', query !== '' && !anyResultAtAll);
+});
