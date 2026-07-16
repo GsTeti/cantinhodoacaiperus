@@ -207,6 +207,8 @@ section{scroll-margin-top: 88px;}
 .radio-chip-flavor-restricted{display:none;}
 .radio-chip-flavor-restricted.chip-flavor-visible{display:flex;}
 
+.radio-chip-disabled{ opacity:0.5; pointer-events:none; }
+
 /* smooth reveal */
 .reveal{
   max-height:0; opacity:0; overflow:hidden; pointer-events:none;

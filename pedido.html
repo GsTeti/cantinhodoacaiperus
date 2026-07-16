@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acompanhar Pedido — Cantinho do Açaí Perus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,600;0,6..12,700;0,6..12,800;1,6..12,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="wrap">
+    <a href="index.html" class="app-header-brand">
+      <img src="img/logo.png" alt="logo">
+      <strong>Cantinho do Açaí Perus</strong>
+    </a>
+    <nav class="app-header-nav">
+      <a href="conta.html">👤 Minha conta</a>
+    </nav>
+  </div>
+</header>
+
+<main class="app-main">
+  <div class="wrap">
+    <div id="tracker-content">
+      <p class="empty-state">Carregando pedido...</p>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-client.js"></script>
+<script src="pedido.js"></script>
+</body>
+</html>

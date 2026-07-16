@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel da Loja — Cantinho do Açaí Perus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,600;0,6..12,700;0,6..12,800;1,6..12,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="wrap">
+    <a href="index.html" class="app-header-brand">
+      <img src="img/logo.png" alt="logo">
+      <strong>Painel da Loja</strong>
+    </a>
+    <nav class="app-header-nav">
+      <button type="button" id="logout-btn" style="display:none;">Sair</button>
+    </nav>
+  </div>
+</header>
+
+<main class="app-main">
+  <div class="wrap">
+
+    <!-- ---------- Login do admin ---------- -->
+    <section id="admin-login-view" class="app-narrow">
+      <div class="app-card">
+        <h1 class="app-title">Acesso da loja</h1>
+        <p class="app-subtitle">Entre com a conta de administrador.</p>
+        <div class="app-msg" id="admin-msg"></div>
+        <form id="admin-login-form">
+          <div class="app-field">
+            <label for="admin-email">E-mail</label>
+            <input type="email" id="admin-email" required>
+          </div>
+          <div class="app-field">
+            <label for="admin-password">Senha</label>
+            <input type="password" id="admin-password" required>
+          </div>
+          <button type="submit" class="app-btn">Entrar</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ---------- Painel ---------- -->
+    <section id="admin-panel-view" style="display:none;">
+
+      <div class="admin-topbar">
+        <h1 class="app-title" style="margin:0;">Painel da loja</h1>
+        <div class="store-toggle">
+          <span class="store-toggle-label" id="store-toggle-label">Carregando...</span>
+          <label class="switch">
+            <input type="checkbox" id="store-open-switch">
+            <span class="switch-track"></span>
+          </label>
+        </div>
+      </div>
+
+      <h2 class="app-section-title">📦 Estoque de ingredientes</h2>
+      <p class="app-subtitle" style="margin-bottom:20px;">Desmarque um item para escondê-lo do cardápio (esgotado).</p>
+      <div id="stock-sections"></div>
+
+      <h2 class="app-section-title">🧾 Pedidos</h2>
+      <div class="app-tabs" id="order-filter-tabs">
+        <div class="app-tab active" data-filter="active">Em andamento</div>
+        <div class="app-tab" data-filter="delivered">Entregues</div>
+        <div class="app-tab" data-filter="cancelled">Cancelados</div>
+      </div>
+      <div id="orders-panel-list"></div>
+
+    </section>
+
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-client.js"></script>
+<script src="admin.js"></script>
+
+<div id="admin-modal-overlay" class="admin-modal-overlay">
+  <div class="admin-modal">
+    <p id="admin-modal-message"></p>
+    <textarea id="admin-modal-input" class="admin-modal-textarea" rows="3" placeholder=""></textarea>
+    <div class="admin-modal-actions">
+      <button type="button" id="admin-modal-cancel" class="btn-mini secondary">Voltar</button>
+      <button type="button" id="admin-modal-confirm" class="btn-mini danger">Confirmar</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

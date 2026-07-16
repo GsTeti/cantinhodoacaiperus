@@ -8,11 +8,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,600;0,6..12,700;0,6..12,800;1,6..12,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="app.css">
 </head>
 <body>
 
 <section class="store-hero">
-<div class="store-hero-bg" style="background-image:url('img/barca.jpeg'); background-position: 50% 90%;"></div>
+<div class="store-hero-bg" style="background-image:url('img/barca.jpeg'); background-position: 50% 70%;"></div>
 </section>
 
 <section class="store-info-bar">
@@ -25,6 +26,7 @@
       <div class="store-status-row">
         <span class="status-badge status-open" id="store-status-badge">🟢 Aberto agora</span>
         <button type="button" class="store-details-btn" id="open-store-info">ℹ️ Horários, endereço e mais</button>
+        <a href="conta.html" class="store-details-btn">👤 Minha conta</a>
       </div>
       <div class="store-meta-row">
         <div class="store-meta-item">
@@ -188,7 +190,29 @@
 
         <div class="cat-block">
           <div class="cat-title">Observações <span class="cat-hint">opcional</span></div>
-          <textarea id="customer-notes" class="notes-textarea" rows="3" placeholder="Ex: Nutella no meio, cor do bis, combinação separada..."></textarea>
+          <textarea id="customer-notes" class="notes-textarea" rows="3" placeholder="Ex: Nutella no meio, cor do bis, combinaçao separada..."></textarea>
+        </div>
+
+        <div class="cat-block reveal" id="auth-gate">
+          <div class="cat-title">Entre para finalizar o pedido</div>
+          <p style="font-size:0.88rem; color:rgba(42,14,38,0.65); margin-bottom:16px;">É rápido — assim seu pedido fica salvo com acompanhamento em tempo real.</p>
+          <div class="app-tabs" style="max-width:320px;">
+            <div class="app-tab active auth-gate-tab" data-gate="login">Entrar</div>
+            <div class="app-tab auth-gate-tab" data-gate="signup">Criar conta</div>
+          </div>
+          <div class="app-msg" id="auth-gate-msg"></div>
+          <form id="auth-gate-login-form" style="max-width:400px;">
+            <div class="app-field"><label for="gate-email">E-mail</label><input type="email" id="gate-email" required></div>
+            <div class="app-field"><label for="gate-password">Senha</label><input type="password" id="gate-password" required></div>
+            <button type="submit" class="app-btn" style="max-width:220px;">Entrar e enviar pedido</button>
+          </form>
+          <form id="auth-gate-signup-form" style="display:none; max-width:400px;">
+            <div class="app-field"><label for="gate-name">Nome</label><input type="text" id="gate-name" required></div>
+            <div class="app-field"><label for="gate-phone">Telefone / WhatsApp</label><input type="tel" id="gate-phone" required></div>
+            <div class="app-field"><label for="gate-signup-email">E-mail</label><input type="email" id="gate-signup-email" required></div>
+            <div class="app-field"><label for="gate-signup-password">Senha</label><input type="password" id="gate-signup-password" required minlength="6"></div>
+            <button type="submit" class="app-btn" style="max-width:220px;">Criar conta e enviar pedido</button>
+          </form>
         </div>
 
       </div>
@@ -197,7 +221,7 @@
           <div class="label">Total do pedido</div>
           <div class="val" id="total-val">R$ 0,00</div>
         </div>
-        <a id="send-order" href="#" target="_blank" rel="noopener">📲 Enviar pedido no WhatsApp</a>
+        <a id="send-order" href="#" aria-disabled="true">📲 Enviar pedido</a>
       </div>
     </div>
   </div>
@@ -231,14 +255,12 @@
 
     <div class="modal-section">
       <div class="modal-section-title">⏱️ Tempo médio de espera</div>
-      <!-- ⚠️ EDITE: valores de exemplo -->
       <p>Delivery: 40 – 60 minutos</p>
       <p>Retirada no balcão: 20 – 40 minutos</p>
     </div>
 
     <div class="modal-section">
       <div class="modal-section-title">🕒 Horários de funcionamento</div>
-      <!-- ⚠️ EDITE: preencha com os horários reais -->
       <div class="hours-table">
         <div><span>Domingo</span><span>15:00 – 21:30</span></div>
         <div><span>Segunda</span><span>15:00 – 21:30</span></div>
@@ -248,6 +270,7 @@
         <div><span>Sexta</span><span>15:00 – 21:30</span></div>
         <div><span>Sábado</span><span>15:00 – 21:30</span></div>
       </div>
+      <p style="margin-top:10px; font-size:0.82rem; color:rgba(42,14,38,0.55);">A loja pode abrir ou fechar fora desses horários — o status no topo da página é sempre o mais atual.</p>
     </div>
 
     <div class="modal-section">
@@ -266,6 +289,8 @@
 
 <a href="javascript:void(0);" onclick="window.scrollTo({top: 0, behavior: 'smooth'});" id="back-to-top" aria-label="Voltar ao topo">↑</a>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-client.js"></script>
 <script src="script.js"></script>
 
 </body>
