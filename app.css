@@ -222,6 +222,11 @@
 .admin-modal-actions .btn-mini{ flex:1; }
 .btn-mini.danger.filled{ background:#a32b2b; border-color:#a32b2b; color:#fff; }
 
+.field-error{
+  border-color:#c0392b !important;
+  box-shadow:0 0 0 2px rgba(192,57,43,0.15);
+}
+
 @media (max-width:640px){
   .app-card, .tracker-card{ padding:24px; }
 }
