@@ -54,6 +54,7 @@ async function checkAdminAndInit(){
   loadStock();
   loadOrders('active');
   subscribeRealtime();
+  tryReconnectPrinter();
 }
 
 // ---------- Abrir/fechar loja ----------
@@ -170,12 +171,55 @@ async function loadOrders(filter){
   else query = query.eq('status', filter);
 
   const { data, error } = await query;
+
+  renderDailyTotals(filter === 'delivered' ? (data || []) : []);
+
   ordersPanelList.innerHTML = '';
   if(error || !data || data.length === 0){
     ordersPanelList.innerHTML = '<p class="empty-state">Nenhum pedido aqui.</p>';
     return;
   }
   data.forEach(order => renderOrderCard(order));
+}
+
+function renderDailyTotals(orders){
+  const summaryEl = document.getElementById('daily-totals');
+  if(!summaryEl) return;
+  if(!orders || orders.length === 0){ summaryEl.innerHTML = ''; return; }
+
+  const groups = {};
+  orders.forEach(o => {
+    const day = new Date(o.created_at).toLocaleDateString('pt-BR');
+    if(!groups[day]) groups[day] = { total: 0, count: 0 };
+    groups[day].total += Number(o.total);
+    groups[day].count += 1;
+  });
+
+  const days = Object.keys(groups).sort((a, b) => {
+    const [da, ma, ya] = a.split('/').map(Number);
+    const [db, mb, yb] = b.split('/').map(Number);
+    return new Date(yb, mb - 1, db) - new Date(ya, ma - 1, da);
+  });
+
+  const grandTotal = orders.reduce((s, o) => s + Number(o.total), 0);
+
+  summaryEl.innerHTML = `
+    <div class="daily-totals-box">
+      <div class="daily-totals-title">💰 Faturamento por dia</div>
+      ${days.map(day => `
+        <div class="daily-totals-row">
+          <span class="daily-totals-date">${day}</span>
+          <span class="daily-totals-count">${groups[day].count} pedido${groups[day].count > 1 ? 's' : ''}</span>
+          <span class="daily-totals-value">${fmt(groups[day].total)}</span>
+        </div>
+      `).join('')}
+      <div class="daily-totals-row daily-totals-grand">
+        <span class="daily-totals-date">Total geral</span>
+        <span class="daily-totals-count">${orders.length} pedidos</span>
+        <span class="daily-totals-value">${fmt(grandTotal)}</span>
+      </div>
+    </div>
+  `;
 }
 
 function renderOrderCard(order){
@@ -240,7 +284,9 @@ function renderOrderCard(order){
     const btn = document.createElement('button');
     btn.className = 'btn-mini'; btn.textContent = NEXT_LABEL[order.status];
     btn.addEventListener('click', async () => {
+      const wasPending = order.status === 'pending';
       await supabase.from('orders').update({ status: NEXT_STATUS[order.status] }).eq('id', order.id);
+	  if(wasPending) printOrder(order);
       loadOrders(currentFilter);
     });
     wrap.appendChild(btn);
@@ -303,3 +349,118 @@ function subscribeRealtime(){
   const { data: { user } } = await supabase.auth.getUser();
   if(user) checkAdminAndInit();
 })();
+
+// ---------- Impressora Bluetooth (ESC/POS via Web Serial) ----------
+let printerWriter = null;
+const ESC = 0x1B;
+
+document.getElementById('connect-printer-btn').addEventListener('click', connectPrinter);
+
+async function connectPrinter(){
+  if(!('serial' in navigator)){
+    alert('Esse navegador não suporta impressão direta. Use o Chrome ou Edge no computador.');
+    return;
+  }
+  try{
+    const port = await navigator.serial.requestPort();
+    await port.open({ baudRate: 9600 });
+    printerWriter = port.writable.getWriter();
+    updatePrinterStatus(true);
+  }catch(err){
+    console.error(err);
+    alert('Não consegui conectar. Confirme que a impressora está pareada e ligada.');
+  }
+}
+
+async function tryReconnectPrinter(){
+  if(!('serial' in navigator)) return;
+  const ports = await navigator.serial.getPorts(); // portas já autorizadas antes
+  if(ports.length === 0) return;
+  try{
+    await ports[0].open({ baudRate: 9600 });
+    printerWriter = ports[0].writable.getWriter();
+    updatePrinterStatus(true);
+  }catch{
+    updatePrinterStatus(false);
+  }
+}
+
+function updatePrinterStatus(connected){
+  const el = document.getElementById('printer-status');
+  el.textContent = connected ? '🖨️ Impressora conectada' : '🖨️ Impressora desconectada';
+  el.className = 'printer-status ' + (connected ? 'ok' : 'off');
+}
+
+function sanitizeText(str){
+  return str
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acentos
+    .replace(/[•·●○▪]/g, '-')                          // bullets comuns viram hífen
+    .replace(/[^\x00-\x7F]/g, '');                      // qualquer coisa não-ASCII que sobrar, remove
+}
+
+function buildReceiptBytes(order, viaLabel){
+  const enc = new TextEncoder();
+  const bytes = [];
+  const raw = (...arr) => bytes.push(...arr);
+  const text = (s) => bytes.push(...enc.encode(sanitizeText(s)));
+
+  raw(ESC, 0x40);             // inicializa
+  raw(ESC, 0x61, 0x01);       // centralizar
+  raw(ESC, 0x21, 0x30);       // fonte grande
+  text('CANTINHO DO ACAI\nPERUS\n');
+  raw(ESC, 0x21, 0x00);       // fonte normal
+
+  if(viaLabel){
+    raw(ESC, 0x45, 0x01);
+    text(`--- ${viaLabel} ---\n`);
+    raw(ESC, 0x45, 0x00);
+  }
+
+  raw(ESC, 0x61, 0x00);       // alinhar esquerda
+  text('--------------------------------\n');
+  text(`Pedido #${order.id.slice(0,8)}\n`);
+  text(`${new Date(order.created_at).toLocaleString('pt-BR')}\n`);
+  text('--------------------------------\n');
+  text(`Cliente: ${order.customer_name}\n`);
+  if(order.customer_phone) text(`Tel: ${order.customer_phone}\n`);
+  text('--------------------------------\n');
+  order.cups.forEach((c,i) => {
+  text(`Copo ${i+1}:\n`);
+  c.parts.forEach(p => text(`  ${p}\n`));
+  text('\n');
+});
+  text('--------------------------------\n');
+  if(order.delivery_type === 'Delivery'){
+    text(`Entrega: ${order.address}\n`);
+    if(order.reference) text(`Ref: ${order.reference}\n`);
+  } else {
+    text('Retirada no local\n');
+  }
+  text(`Pagamento: ${order.payment_method}\n`);
+  if(order.change_for) text(`Troco para: R$ ${order.change_for}\n`);
+  if(order.notes) text(`Obs: ${order.notes}\n`);
+  text('--------------------------------\n');
+  raw(ESC, 0x45, 0x01);       // negrito on
+  text(`TOTAL: ${fmt(order.total)}\n`);
+  raw(ESC, 0x45, 0x00);       // negrito off
+  text('\n\n\n\n');
+  return new Uint8Array(bytes);
+}
+
+async function printOrder(order){
+  if(!printerWriter){
+    console.warn('Impressora nao conectada — pedido nao foi impresso.');
+    return;
+  }
+  try{
+    if(order.delivery_type === 'Delivery'){
+      await printerWriter.write(buildReceiptBytes(order, 'VIA LOJA'));
+      await printerWriter.write(buildReceiptBytes(order, 'VIA MOTOQUEIRO'));
+    } else {
+      await printerWriter.write(buildReceiptBytes(order));
+    }
+  }catch(err){
+    console.error(err);
+    alert('Falha ao imprimir o pedido.');
+  }
+}

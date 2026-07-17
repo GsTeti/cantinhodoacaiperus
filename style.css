@@ -511,6 +511,43 @@ a:focus-visible, button:focus-visible, input:focus-visible{outline:3px solid var
 }
 .search-no-results.show{ display:block; }
 
+.edit-mode-banner{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  background:rgba(124,179,66,0.12); border:1.5px dashed var(--lime);
+  border-radius:14px; padding:12px 16px; margin-bottom:18px; font-size:0.9rem; color:var(--plum);
+}
+.edit-mode-banner button{
+  background:#fff; border:1.5px solid var(--line); border-radius:100px; padding:6px 14px;
+  font-family:'Baloo 2'; font-weight:700; font-size:0.82rem; cursor:pointer;
+}
+.cart-item-warning{ border-color:#e0a63a !important; background:rgba(224,166,58,0.08); }
+.cart-item-missing{ font-size:0.78rem; color:#a36b00; margin-top:4px; }
+.cart-item-edit{
+  background:none; border:none; font-size:1rem; cursor:pointer; opacity:0.6; padding:4px;
+}
+.cart-item-edit:hover{ opacity:1; }
+
+.daily-totals-box{
+  background:#fff; border:1.5px solid var(--line); border-radius:16px;
+  padding:16px 20px; margin-bottom:20px;
+}
+.daily-totals-title{
+  font-family:'Baloo 2'; font-weight:800; color:var(--plum); font-size:1rem; margin-bottom:12px;
+}
+.daily-totals-row{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:8px 0; border-bottom:1px solid var(--line); font-size:0.9rem;
+}
+.daily-totals-row:last-of-type{ border-bottom:none; }
+.daily-totals-date{ font-weight:700; color:var(--plum); flex:1; }
+.daily-totals-count{ color:rgba(42,14,38,0.6); font-size:0.82rem; }
+.daily-totals-value{ font-family:'Baloo 2'; font-weight:800; color:var(--berry-deep); min-width:90px; text-align:right; }
+.daily-totals-grand{
+  margin-top:6px; padding-top:12px; border-top:2px solid var(--gold); border-bottom:none;
+}
+.daily-totals-grand .daily-totals-date{ font-size:1rem; }
+.daily-totals-grand .daily-totals-value{ font-size:1.05rem; }
+
 /* ---------- Cardápio com mais espaço (menos comprimido) ---------- */
 .builder-body{ padding:44px 40px; }
 .cat-block{ margin-bottom:40px; }

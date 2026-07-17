@@ -30,6 +30,7 @@ let currentUser = null;
 let savedAddresses = [];
 
 let cart = [];
+let editingCartId = null; // null = adicionando copo novo; número = editando item existente do carrinho
 let cartIdSeq = 1;
 let currentCupTotal = 0;
 
@@ -294,10 +295,18 @@ function addCupToCart(){
     }
   });
 
-  cart.push({
-    id: cartIdSeq++, parts, total,
-    flavor: flavorChecked.value, size: sizeChecked.value, toppings
-  });
+  if(editingCartId !== null){
+    const idx = cart.findIndex(i => i.id === editingCartId);
+    if(idx !== -1){
+      cart[idx] = { id: editingCartId, parts, total, flavor: flavorChecked.value, size: sizeChecked.value, toppings };
+    }
+    exitEditMode();
+  } else {
+    cart.push({
+      id: cartIdSeq++, parts, total,
+      flavor: flavorChecked.value, size: sizeChecked.value, toppings
+    });
+  }
 
   flavorChecked.checked = false;
   sizeChecked.checked = false;
@@ -309,32 +318,114 @@ function addCupToCart(){
   recalcGrandTotal();
 }
 
+function enterEditMode(item){
+  editingCartId = item.id;
+
+  const flavorInput = document.querySelector(`input[name="flavor"][value="${CSS.escape(item.flavor)}"]`);
+  if(flavorInput){
+  flavorInput.checked = true;
+  sizeWrapper.classList.add('reveal-open');
+}
+
+  const sizeInput = document.querySelector(`input[name="size"][value="${CSS.escape(item.size)}"]`);
+  if(sizeInput) sizeInput.checked = true;
+
+  updateSizePrices();
+  updateFlavorRestrictedOptions();
+
+  const droppedInEdit = [];
+document.querySelectorAll('.opt-grid .opt').forEach(optDiv => {
+  const id = parseInt(optDiv.dataset.id);
+  const match = item.toppings.find(t => t.id === id);
+  const isAvailable = !optDiv.classList.contains('opt-unavailable');
+
+  if(match && !isAvailable) droppedInEdit.push(match.name);
+
+  const qty = (match && isAvailable) ? match.qty : 0;
+  optDiv.dataset.qty = qty;
+  const qtyEl = optDiv.querySelector('.qty-val');
+  if(qtyEl) qtyEl.textContent = qty;
+  optDiv.classList.toggle('opt-active', qty > 0);
+});
+
+if(droppedInEdit.length){
+  showStockWarningModal([], [`${item.flavor} — ${item.size}: ${droppedInEdit.join(', ')} (esgotado, não recarregado)`]);
+}
+
+  recalcCurrentCup();
+
+  const addBtn = document.getElementById('add-another-cup');
+  const finishBtn = document.getElementById('finish-cups');
+  if(addBtn) addBtn.textContent = '💾 Salvar alterações';
+  if(finishBtn) finishBtn.textContent = '💾 Salvar e continuar';
+  showEditBanner(true);
+
+  scrollToFlavorStart();
+}
+
+function exitEditMode(){
+  editingCartId = null;
+  const addBtn = document.getElementById('add-another-cup');
+  const finishBtn = document.getElementById('finish-cups');
+  if(addBtn) addBtn.textContent = '➕ Adicionar outro copo';
+  if(finishBtn) finishBtn.textContent = 'Finalizar copos';
+  showEditBanner(false);
+}
+
+function showEditBanner(show){
+  const banner = document.getElementById('edit-mode-banner');
+  if(banner) banner.style.display = show ? 'flex' : 'none';
+}
+
+document.addEventListener('click', (e) => {
+  if(e.target && e.target.id === 'cancel-edit-btn'){
+    document.querySelectorAll('input[name="flavor"], input[name="size"]').forEach(i => i.checked = false);
+    document.querySelectorAll('.opt-grid .opt').forEach(optDiv => {
+      optDiv.dataset.qty = '0';
+      optDiv.querySelector('.qty-val').textContent = '0';
+      optDiv.classList.remove('opt-active');
+    });
+    sizeWrapper.classList.remove('reveal-open');
+    recalcCurrentCup();
+    exitEditMode();
+  }
+});
+
 function renderCart(){
   cartBlock.classList.toggle('has-items', cart.length > 0);
   cartList.innerHTML = '';
   cart.forEach((item, index) => {
     const row = document.createElement('div');
-    row.className = 'cart-item';
+    row.className = 'cart-item' + (item.missingNote ? ' cart-item-warning' : '');
     row.innerHTML = `
       <div class="cart-item-info">
         <div class="cart-item-title">Copo ${index + 1}</div>
         <div class="cart-item-parts">${item.parts.join(' • ')}</div>
+        ${item.missingNote ? `<div class="cart-item-missing">⚠️ ${item.missingNote}</div>` : ''}
       </div>
       <div class="cart-item-side">
         <span class="cart-item-price">${fmt(item.total)}</span>
+        <button type="button" class="cart-item-edit" data-id="${item.id}" aria-label="Editar copo">✏️</button>
         <button type="button" class="cart-item-remove" data-id="${item.id}" aria-label="Remover copo">✕</button>
       </div>`;
     cartList.appendChild(row);
   });
   cartList.querySelectorAll('.cart-item-remove').forEach(btn => {
     btn.addEventListener('click', () => {
-      cart = cart.filter(item => item.id !== parseInt(btn.dataset.id));
+      const id = parseInt(btn.dataset.id);
+      cart = cart.filter(item => item.id !== id);
+      if(editingCartId === id) exitEditMode();
       renderCart();
       recalcGrandTotal();
     });
   });
+  cartList.querySelectorAll('.cart-item-edit').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = cart.find(i => i.id === parseInt(btn.dataset.id));
+      if(item) enterEditMode(item);
+    });
+  });
 }
-
 function scrollToFlavorStart(){
   const target = document.getElementById('flavor-options').closest('.cat-block');
   if(target) setTimeout(() => target.scrollIntoView({ behavior:'smooth' }), 50);
@@ -619,6 +710,30 @@ function closeStoreModal(){ storeInfoModal.classList.remove('open'); document.bo
 storeInfoModal.addEventListener('click', (e) => { if(e.target === storeInfoModal) closeStoreModal(); });
 document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && storeInfoModal.classList.contains('open')) closeStoreModal(); });
 
+const stockWarningModal = document.getElementById('stock-warning-modal');
+document.getElementById('close-stock-warning')?.addEventListener('click', () => stockWarningModal.classList.remove('open'));
+stockWarningModal?.addEventListener('click', (e) => { if(e.target === stockWarningModal) stockWarningModal.classList.remove('open'); });
+
+function showStockWarningModal(fullyRemoved, partialWarnings){
+  const content = document.getElementById('stock-warning-content');
+  let html = '';
+  if(fullyRemoved.length){
+    html += `<div class="modal-section">
+      <div class="modal-section-title">Copos removidos (esgotados)</div>
+      <p>${fullyRemoved.join('<br>')}</p>
+    </div>`;
+  }
+  if(partialWarnings.length){
+    html += `<div class="modal-section">
+      <div class="modal-section-title">Itens que saíram de alguns copos</div>
+      <p>${partialWarnings.join('<br>')}</p>
+      <p style="margin-top:8px;">Você pode tocar no ✏️ ao lado do copo pra escolher um substituto.</p>
+    </div>`;
+  }
+  content.innerHTML = html;
+  stockWarningModal.classList.add('open');
+}
+
 // ---------- Parallax do banner ----------
 const storeHeroBg = document.querySelector('.store-hero-bg');
 const storeHeroSection = document.querySelector('.store-hero');
@@ -702,44 +817,49 @@ async function tryLoadRepeatOrder(){
   let cups;
   try{ cups = JSON.parse(raw); } catch { return; }
 
-  const removed = [];
+  const fullyRemoved = [];
+  const partialWarnings = [];
+
   cups.forEach(cup => {
     const { flavor, size } = getCupFlavorSize(cup);
     if(!flavor || !size) return;
     const flavorOk = FLAVORS.find(f => f.name === flavor && f.available);
     const sizeOk = SIZES.find(s => s.name === size && s.available);
     if(!flavorOk || !sizeOk){
-      removed.push(`Copo (${flavor} — ${size})`);
+      fullyRemoved.push(`${flavor} — ${size}`);
       return;
     }
     let total = getSizePriceFor(size, flavor);
     const parts = [`${flavor} — ${size}`];
     const toppings = [];
+    const missing = [];
 
-    // AQUI dentro é onde entra a versão nova, substituindo o forEach antigo:
     parseToppingsFallback(cup).forEach(t => {
       const live = Object.values(MENU).flat().find(m =>
         t.id != null ? m.id === t.id : m.name === t.name
       );
-      if(!live || !live.available){ removed.push(`${t.name} (do copo ${flavor})`); return; }
+      if(!live || !live.available){ missing.push(t.name); return; }
       total += live.price * t.qty;
       parts.push(t.qty > 1 ? `${t.name} x${t.qty}` : t.name);
       toppings.push({ id: live.id, name: live.name, qty: t.qty });
     });
 
-    cart.push({ id: cartIdSeq++, parts, total, flavor, size, toppings });
+    const missingNote = missing.length ? `Esgotado: ${missing.join(', ')} — toque em ✏️ para trocar` : null;
+    if(missing.length) partialWarnings.push(`${flavor} — ${size}: ${missing.join(', ')}`);
+
+    cart.push({ id: cartIdSeq++, parts, total, flavor, size, toppings, missingNote });
   });
 
   renderCart();
   recalcGrandTotal();
-  if(removed.length){
-    alert('Alguns itens desse pedido estão esgotados e não entraram: ' + removed.join(', '));
+
+  if(fullyRemoved.length || partialWarnings.length){
+    showStockWarningModal(fullyRemoved, partialWarnings);
   }
   if(cart.length){
     document.getElementById('cart-block')?.scrollIntoView({ behavior:'smooth' });
   }
 }
-
 // função auxiliar, essa sim fica solta fora, do lado de fora da função acima
 function parseToppingsFallback(cup){
   if (cup.toppings && cup.toppings.length) return cup.toppings;
