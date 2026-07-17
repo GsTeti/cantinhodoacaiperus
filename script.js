@@ -395,6 +395,10 @@ document.querySelectorAll('#delivery-options input, #customer-name, #customer-ad
   });
 });
 
+document.getElementById('payment-options').addEventListener('change', function(){
+  this.classList.remove('field-error');
+});
+
 function recalcGrandTotal(){
   let total = cart.reduce((sum, item) => sum + item.total, 0);
   const deliveryChecked = document.querySelector('input[name="delivery-type"]:checked');
@@ -468,19 +472,24 @@ function validateOrderFields(){
   const deliveryChecked = document.querySelector('input[name="delivery-type"]:checked');
   const isDelivery = deliveryChecked && deliveryChecked.value === 'Delivery';
   const address = document.getElementById('customer-address');
+  const paymentChecked = document.querySelector('input[name="payment-method"]:checked');
+  const paymentOptions = document.getElementById('payment-options');
 
-  const fieldsToCheck = isDelivery ? [name, address] : [name];
   let firstInvalid = null;
 
-  fieldsToCheck.forEach(field => {
+  const textFields = isDelivery ? [name, address] : [name];
+  textFields.forEach(field => {
     const valid = field.value.trim() !== '';
     field.classList.toggle('field-error', !valid);
     if(!valid && !firstInvalid) firstInvalid = field;
   });
 
+  paymentOptions.classList.toggle('field-error', !paymentChecked);
+  if(!paymentChecked && !firstInvalid) firstInvalid = paymentOptions;
+
   if(firstInvalid){
     firstInvalid.scrollIntoView({ behavior:'smooth', block:'center' });
-    firstInvalid.focus();
+    if(typeof firstInvalid.focus === 'function') firstInvalid.focus();
     return false;
   }
   return true;
