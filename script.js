@@ -389,6 +389,12 @@ function renderSavedAddresses(){
 document.querySelectorAll('#delivery-options input, #customer-name, #customer-address, #customer-reference, #troco-value, #customer-notes')
   .forEach(inp => inp.addEventListener('input', recalcGrandTotal));
 
+  ['customer-name','customer-address'].forEach(id => {
+  document.getElementById(id).addEventListener('input', function(){
+    this.classList.remove('field-error');
+  });
+});
+
 function recalcGrandTotal(){
   let total = cart.reduce((sum, item) => sum + item.total, 0);
   const deliveryChecked = document.querySelector('input[name="delivery-type"]:checked');
@@ -408,9 +414,8 @@ function recalcGrandTotal(){
   const name = document.getElementById('customer-name').value.trim();
   const address = document.getElementById('customer-address').value.trim();
 
-  const ready = cart.length > 0 && !!deliveryChecked && !!paymentChecked && name !== '' && (!isDelivery || address !== '') && storeIsOpen;
-  btn.setAttribute('aria-disabled', ready ? 'false' : 'true');
-  btn.style.opacity = ready ? '1' : '0.5';
+  btn.setAttribute('aria-disabled', 'false');
+  btn.style.opacity = '1';
 
   if(!storeIsOpen && cart.length > 0 && deliveryChecked && paymentChecked && name && (!isDelivery || address)){
     btn.textContent = '🔴 Loja fechada no momento';
@@ -458,6 +463,29 @@ PAYMENT_METHODS.forEach(method => {
 });
 document.querySelectorAll('input[name="payment-method"]').forEach(inp => inp.addEventListener('change', onPaymentChange));
 
+function validateOrderFields(){
+  const name = document.getElementById('customer-name');
+  const deliveryChecked = document.querySelector('input[name="delivery-type"]:checked');
+  const isDelivery = deliveryChecked && deliveryChecked.value === 'Delivery';
+  const address = document.getElementById('customer-address');
+
+  const fieldsToCheck = isDelivery ? [name, address] : [name];
+  let firstInvalid = null;
+
+  fieldsToCheck.forEach(field => {
+    const valid = field.value.trim() !== '';
+    field.classList.toggle('field-error', !valid);
+    if(!valid && !firstInvalid) firstInvalid = field;
+  });
+
+  if(firstInvalid){
+    firstInvalid.scrollIntoView({ behavior:'smooth', block:'center' });
+    firstInvalid.focus();
+    return false;
+  }
+  return true;
+}
+
 // ============================================================
 // ENVIO DO PEDIDO (exige login)
 // ============================================================
@@ -466,7 +494,8 @@ const authGate = document.getElementById('auth-gate');
 
 sendOrderBtn.addEventListener('click', async (e) => {
   e.preventDefault();
-  if(sendOrderBtn.getAttribute('aria-disabled') === 'true') return;
+
+  if(!validateOrderFields()) return;
 
   if(!currentUser){
     authGate.classList.add('reveal-open');
