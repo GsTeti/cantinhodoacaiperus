@@ -19,7 +19,7 @@ const PAYMENT_METHODS = [
 ];
 
 // ⚠️ EDITE AQUI se a chave Pix mudar
-const PIX_KEY = '11949360595';
+const PIX_KEY = '11913299252';
 
 // ---------- Estado carregado do banco ----------
 let FLAVORS = [];
