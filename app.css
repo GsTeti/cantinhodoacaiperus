@@ -223,8 +223,8 @@
 .btn-mini.danger.filled{ background:#a32b2b; border-color:#a32b2b; color:#fff; }
 
 .field-error{
-  border-color:#c0392b !important;
-  box-shadow:0 0 0 2px rgba(192,57,43,0.15);
+  border: 2px solid #c0392b !important;
+  box-shadow: 0 0 0 3px rgba(192,57,43,0.2);
 }
 
 @media (max-width:640px){
