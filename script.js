@@ -630,13 +630,11 @@ updateHeroParallax();
 const menuSearchInput = document.getElementById('menu-search');
 const searchNoResults = document.getElementById('search-no-results');
 const flavorBlock = document.getElementById('flavor-options').closest('.cat-block');
-const sizeWrapper = document.getElementById('size-wrapper');
 
 menuSearchInput.addEventListener('input', () => {
   const query = menuSearchInput.value.trim().toLowerCase();
   const isSearching = query !== '';
 
-  // esconde sabor e tamanho enquanto a pessoa estiver pesquisando
   flavorBlock.style.display = isSearching ? 'none' : '';
   sizeWrapper.style.display = isSearching ? 'none' : '';
 
