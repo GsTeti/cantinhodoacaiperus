@@ -342,10 +342,47 @@ function renderOrderCard(order){
     wrap.appendChild(reprintBtn);
   }
 }
+
+// ---------- Som de notificação de pedido novo ----------
+function playNewOrderSound(){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = ctx.currentTime;
+
+    const playTone = (freq, start, dur, type='square', vol=0.25) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, now + start);
+      gain.gain.linearRampToValueAtTime(vol, now + start + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + start + dur);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now + start);
+      osc.stop(now + start + dur + 0.05);
+    };
+
+    // sequência tipo "caixa registradora": bipe duplo grave + "cling" agudo no final
+    playTone(660, 0,    0.12, 'square', 0.28);
+    playTone(660, 0.14, 0.12, 'square', 0.28);
+    playTone(880, 0.30, 0.10, 'square', 0.25);
+    playTone(1320, 0.42, 0.35, 'triangle', 0.22); // o "cling" final, mais brilhante e longo
+  }catch(err){
+    console.warn('Não foi possível tocar o som de notificação.', err);
+  }
+}
+
 // ---------- Tempo real: novos pedidos e mudanças aparecem sem precisar atualizar a página ----------
 function subscribeRealtime(){
   supabase.channel('admin-orders')
-    .on('postgres_changes', { event:'*', schema:'public', table:'orders' }, () => {
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'orders' }, () => {
+      playNewOrderSound();
+      loadOrders(currentFilter);
+    })
+    .on('postgres_changes', { event:'UPDATE', schema:'public', table:'orders' }, () => {
+      loadOrders(currentFilter);
+    })
+    .on('postgres_changes', { event:'DELETE', schema:'public', table:'orders' }, () => {
       loadOrders(currentFilter);
     })
     .subscribe();
