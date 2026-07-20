@@ -333,8 +333,15 @@ function renderOrderCard(order){
 });
     wrap.appendChild(cancelBtn);
   }
-}
 
+  if(order.status !== 'cancelled'){
+    const reprintBtn = document.createElement('button');
+    reprintBtn.className = 'btn-mini secondary';
+    reprintBtn.textContent = '🖨️ Reimprimir';
+    reprintBtn.addEventListener('click', () => printOrder(order));
+    wrap.appendChild(reprintBtn);
+  }
+}
 // ---------- Tempo real: novos pedidos e mudanças aparecem sem precisar atualizar a página ----------
 function subscribeRealtime(){
   supabase.channel('admin-orders')
@@ -422,7 +429,6 @@ function buildReceiptBytes(order, viaLabel){
   text(`${new Date(order.created_at).toLocaleString('pt-BR')}\n`);
   text('--------------------------------\n');
   text(`Cliente: ${order.customer_name}\n`);
-  if(order.customer_phone) text(`Tel: ${order.customer_phone}\n`);
   text('--------------------------------\n');
   order.cups.forEach((c,i) => {
   text(`Copo ${i+1}:\n`);
