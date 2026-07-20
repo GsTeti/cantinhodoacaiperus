@@ -245,6 +245,8 @@ function updateFlavorRestrictedOptions(){
 
 function onFlavorChange(){
   const flavorChecked = document.querySelector('input[name="flavor"]:checked');
+  document.getElementById('flavor-options').classList.remove('field-error');
+  document.getElementById('base-options').classList.remove('field-error');
   const alreadyOpen = sizeWrapper.classList.contains('reveal-open');
   sizeWrapper.classList.toggle('reveal-open', !!flavorChecked);
   updateSizePrices();
@@ -270,6 +272,14 @@ function recalcCurrentCup(){
   updateFloatPrice();
   const ready = !!(flavorChecked && sizeChecked);
   cupPromptWrapper.classList.toggle('reveal-open', ready);
+}
+
+function commitCurrentCupIfAny(){
+  const flavorChecked = document.querySelector('input[name="flavor"]:checked');
+  const sizeChecked = document.querySelector('input[name="size"]:checked');
+  if(flavorChecked && sizeChecked){
+    addCupToCart();
+  }
 }
 
 function addCupToCart(){
@@ -486,7 +496,7 @@ document.querySelectorAll('#delivery-options input, #customer-name, #customer-ad
   });
 });
 
-document.getElementById('payment-options').addEventListener('change', function(){
+document.getElementById('delivery-options').addEventListener('change', function(){
   this.classList.remove('field-error');
 });
 
@@ -565,8 +575,25 @@ function validateOrderFields(){
   const address = document.getElementById('customer-address');
   const paymentChecked = document.querySelector('input[name="payment-method"]:checked');
   const paymentOptions = document.getElementById('payment-options');
+  const deliveryOptions = document.getElementById('delivery-options');
+
+  const flavorOptionsEl = document.getElementById('flavor-options');
+  const sizeOptionsEl = document.getElementById('base-options');
+  const flavorChecked = document.querySelector('input[name="flavor"]:checked');
+  const sizeChecked = document.querySelector('input[name="size"]:checked');
+  const cartEmpty = cart.length === 0;
 
   let firstInvalid = null;
+
+  // Carrinho vazio = nenhum copo foi montado -> sinaliza sabor e/ou tamanho, além do carrinho
+  cartBlock.classList.toggle('field-error', cartEmpty);
+  flavorOptionsEl.classList.toggle('field-error', cartEmpty && !flavorChecked);
+  sizeOptionsEl.classList.toggle('field-error', cartEmpty && !sizeChecked);
+  if(cartEmpty){
+    if(!flavorChecked) firstInvalid = flavorOptionsEl;
+    else if(!sizeChecked) firstInvalid = sizeOptionsEl;
+    else firstInvalid = cartBlock;
+  }
 
   const textFields = isDelivery ? [name, address] : [name];
   textFields.forEach(field => {
@@ -574,6 +601,9 @@ function validateOrderFields(){
     field.classList.toggle('field-error', !valid);
     if(!valid && !firstInvalid) firstInvalid = field;
   });
+
+  deliveryOptions.classList.toggle('field-error', !deliveryChecked);
+  if(!deliveryChecked && !firstInvalid) firstInvalid = deliveryOptions;
 
   paymentOptions.classList.toggle('field-error', !paymentChecked);
   if(!paymentChecked && !firstInvalid) firstInvalid = paymentOptions;
@@ -594,6 +624,8 @@ const authGate = document.getElementById('auth-gate');
 
 sendOrderBtn.addEventListener('click', async (e) => {
   e.preventDefault();
+
+  commitCurrentCupIfAny();
 
   if(!validateOrderFields()) return;
 
