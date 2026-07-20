@@ -324,7 +324,7 @@ function renderOrderCard(order){
 
   if(order.customer_phone){
     const phone = order.customer_phone.replace(/\D/g,'');
-    const msg = `Oi ${order.customer_name}! Infelizmente não conseguimos aceitar seu pedido nº ${order.id.slice(0,8)}.\n\nMotivo: ${reason || 'entre em contato pra mais detalhes'}\n\nQualquer dúvida é só chamar por aqui 💜`;
+    const msg = `Oi ${order.customer_name}! Infelizmente não conseguimos aceitar seu pedido nº ${order.id.slice(0,8)}.\n\nMotivo: ${reason || 'entre em contato pra mais detalhes'}\n\nQualquer dúvida é só chamar por aqui`;
     window.open('https://wa.me/55' + phone + '?text=' + encodeURIComponent(msg), '_blank');
   } else {
     alert('Esse cliente não tem telefone salvo no perfil — cancelado sem aviso automático.');
