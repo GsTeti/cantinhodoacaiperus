@@ -145,6 +145,11 @@
               <label for="customer-name">Nome</label>
               <input type="text" id="customer-name" placeholder="Seu nome">
             </div>
+			<div class="field">
+  <label for="customer-phone">Telefone / WhatsApp</label>
+  <input type="tel" id="customer-phone" placeholder="(11) 99999-9999">
+</div>
+<div class="field" id="address-field">
             <div class="field" id="address-field">
               <label for="customer-address">Endereço para entrega</label>
               <input type="text" id="customer-address" placeholder="Rua, número, bairro">
@@ -199,26 +204,39 @@
         </div>
 
         <div class="cat-block reveal" id="auth-gate">
-          <div class="cat-title">Entre para finalizar o pedido</div>
-          <p style="font-size:0.88rem; color:rgba(42,14,38,0.65); margin-bottom:16px;">É rápido — assim seu pedido fica salvo com acompanhamento em tempo real.</p>
-          <div class="app-tabs" style="max-width:320px;">
-            <div class="app-tab active auth-gate-tab" data-gate="login">Entrar</div>
-            <div class="app-tab auth-gate-tab" data-gate="signup">Criar conta</div>
-          </div>
-          <div class="app-msg" id="auth-gate-msg"></div>
-          <form id="auth-gate-login-form" style="max-width:400px;">
-            <div class="app-field"><label for="gate-email">E-mail</label><input type="email" id="gate-email" required></div>
-            <div class="app-field"><label for="gate-password">Senha</label><input type="password" id="gate-password" required></div>
-            <button type="submit" class="app-btn" style="max-width:220px;">Entrar e enviar pedido</button>
-          </form>
-          <form id="auth-gate-signup-form" style="display:none; max-width:400px;">
-            <div class="app-field"><label for="gate-name">Nome</label><input type="text" id="gate-name" required></div>
-            <div class="app-field"><label for="gate-phone">Telefone / WhatsApp</label><input type="tel" id="gate-phone" required></div>
-            <div class="app-field"><label for="gate-signup-email">E-mail</label><input type="email" id="gate-signup-email" required></div>
-            <div class="app-field"><label for="gate-signup-password">Senha</label><input type="password" id="gate-signup-password" required minlength="6"></div>
-            <button type="submit" class="app-btn" style="max-width:220px;">Criar conta e enviar pedido</button>
-          </form>
-        </div>
+  <div class="cat-title">Quase lá!</div>
+
+  <div id="auth-gate-choice">
+    <div class="add-cup-row">
+      <button type="button" id="guest-checkout-btn" class="app-btn-outline">🛒 Continuar sem conta</button>
+      <button type="button" id="show-signup-btn" class="app-btn">✨ Criar conta</button>
+    </div>
+    <p style="font-size:0.85rem; color:rgba(42,14,38,0.65); margin-top:10px; text-align:center;">
+      Criando conta você salva seu endereço e repete pedidos antigos em 1 toque.
+    </p>
+    <p style="font-size:0.85rem; margin-top:14px; text-align:center;">
+      Já tem conta? <a href="#" id="show-login-btn">Entrar</a>
+    </p>
+  </div>
+
+  <div class="app-msg" id="auth-gate-msg"></div>
+
+  <form id="auth-gate-login-form" style="display:none; max-width:400px;">
+    <div class="app-field"><label for="gate-email">E-mail</label><input type="email" id="gate-email" required></div>
+    <div class="app-field"><label for="gate-password">Senha</label><input type="password" id="gate-password" required></div>
+    <button type="submit" class="app-btn" style="max-width:220px;">Entrar e enviar pedido</button>
+    <button type="button" class="app-btn-outline auth-gate-back" style="max-width:120px; margin-top:8px;">‹ Voltar</button>
+  </form>
+
+  <form id="auth-gate-signup-form" style="display:none; max-width:400px;">
+    <div class="app-field"><label for="gate-name">Nome</label><input type="text" id="gate-name" required></div>
+    <div class="app-field"><label for="gate-phone">Telefone / WhatsApp</label><input type="tel" id="gate-phone" required></div>
+    <div class="app-field"><label for="gate-signup-email">E-mail</label><input type="email" id="gate-signup-email" required></div>
+    <div class="app-field"><label for="gate-signup-password">Senha</label><input type="password" id="gate-signup-password" required minlength="6"></div>
+    <button type="submit" class="app-btn" style="max-width:220px;">Criar conta e enviar pedido</button>
+    <button type="button" class="app-btn-outline auth-gate-back" style="max-width:120px; margin-top:8px;">‹ Voltar</button>
+  </form>
+</div>
 
       </div>
       <div class="builder-summary">

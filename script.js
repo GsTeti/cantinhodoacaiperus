@@ -101,9 +101,15 @@ function applyStoreStatus(isOpen){
 async function loadAuthState(){
   const { data: { user } } = await supabase.auth.getUser();
   currentUser = user;
-  if(user){
+  if(user && !user.is_anonymous){
     const { data } = await supabase.from('addresses').select('*').order('created_at', { ascending:false });
     savedAddresses = data || [];
+
+    const { data: profile } = await supabase.from('profiles').select('name, phone').eq('id', user.id).maybeSingle();
+    const nameField = document.getElementById('customer-name');
+    const phoneField = document.getElementById('customer-phone');
+    if(profile?.name && nameField && !nameField.value) nameField.value = profile.name;
+    if(profile?.phone && phoneField && !phoneField.value) phoneField.value = profile.phone;
   }
   renderSavedAddresses();
 }
@@ -487,10 +493,10 @@ function renderSavedAddresses(){
 // ============================================================
 // ENTREGA / PAGAMENTO
 // ============================================================
-document.querySelectorAll('#delivery-options input, #customer-name, #customer-address, #customer-reference, #troco-value, #customer-notes')
+document.querySelectorAll('#delivery-options input, #customer-name, #customer-phone, #customer-address, #customer-reference, #troco-value, #customer-notes')
   .forEach(inp => inp.addEventListener('input', recalcGrandTotal));
 
-  ['customer-name','customer-address'].forEach(id => {
+  ['customer-name', 'customer-phone','customer-address'].forEach(id => {
   document.getElementById(id).addEventListener('input', function(){
     this.classList.remove('field-error');
   });
@@ -522,7 +528,8 @@ function recalcGrandTotal(){
   btn.setAttribute('aria-disabled', 'false');
   btn.style.opacity = '1';
 
-  if(!storeIsOpen && cart.length > 0 && deliveryChecked && paymentChecked && name && (!isDelivery || address)){
+  const phone = document.getElementById('customer-phone').value.trim();
+  if(!storeIsOpen && cart.length > 0 && deliveryChecked && paymentChecked && name && phone && (!isDelivery || address)){
     btn.textContent = '🔴 Loja fechada no momento';
   } else {
     btn.textContent = '📲 Enviar pedido';
@@ -569,6 +576,7 @@ PAYMENT_METHODS.forEach(method => {
 document.querySelectorAll('input[name="payment-method"]').forEach(inp => inp.addEventListener('change', onPaymentChange));
 
 function validateOrderFields(){
+  const phone = document.getElementById('customer-phone');
   const name = document.getElementById('customer-name');
   const deliveryChecked = document.querySelector('input[name="delivery-type"]:checked');
   const isDelivery = deliveryChecked && deliveryChecked.value === 'Delivery';
@@ -582,6 +590,7 @@ function validateOrderFields(){
   const flavorChecked = document.querySelector('input[name="flavor"]:checked');
   const sizeChecked = document.querySelector('input[name="size"]:checked');
   const cartEmpty = cart.length === 0;
+  const textFields = isDelivery ? [name, phone, address] : [name, phone];
 
   let firstInvalid = null;
 
@@ -595,7 +604,6 @@ function validateOrderFields(){
     else firstInvalid = cartBlock;
   }
 
-  const textFields = isDelivery ? [name, address] : [name];
   textFields.forEach(field => {
     const valid = field.value.trim() !== '';
     field.classList.toggle('field-error', !valid);
@@ -663,23 +671,49 @@ document.getElementById('auth-gate-signup-form')?.addEventListener('submit', asy
   submitOrder();
 });
 
-document.querySelectorAll('.auth-gate-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.auth-gate-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById('auth-gate-login-form').style.display = tab.dataset.gate === 'login' ? '' : 'none';
-    document.getElementById('auth-gate-signup-form').style.display = tab.dataset.gate === 'signup' ? '' : 'none';
+document.getElementById('guest-checkout-btn')?.addEventListener('click', async () => {
+  const msg = document.getElementById('auth-gate-msg');
+  const btn = document.getElementById('guest-checkout-btn');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  const { error } = await supabase.auth.signInAnonymously();
+  if(error){
+    msg.textContent = 'Não foi possível continuar sem conta. Tente novamente.';
+    msg.className = 'app-msg show error';
+    btn.disabled = false; btn.textContent = '🛒 Continuar sem conta';
+    return;
+  }
+  await loadAuthState();
+  authGate.classList.remove('reveal-open');
+  submitOrder();
+});
+
+document.getElementById('show-signup-btn')?.addEventListener('click', () => {
+  document.getElementById('auth-gate-choice').style.display = 'none';
+  document.getElementById('auth-gate-signup-form').style.display = '';
+});
+
+document.getElementById('show-login-btn')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  document.getElementById('auth-gate-choice').style.display = 'none';
+  document.getElementById('auth-gate-login-form').style.display = '';
+});
+
+document.querySelectorAll('.auth-gate-back').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('auth-gate-login-form').style.display = 'none';
+    document.getElementById('auth-gate-signup-form').style.display = 'none';
+    document.getElementById('auth-gate-choice').style.display = '';
   });
 });
 
 async function submitOrder(){
   if(!storeIsOpen){ recalcGrandTotal(); return; }
 
-  const { data: profile } = await supabase.from('profiles').select('phone').eq('id', currentUser.id).single();
   const deliveryChecked = document.querySelector('input[name="delivery-type"]:checked');
   const isDelivery = deliveryChecked.value === 'Delivery';
   const paymentChecked = document.querySelector('input[name="payment-method"]:checked');
   const name = document.getElementById('customer-name').value.trim();
+  const phone = document.getElementById('customer-phone').value.trim();
   const address = document.getElementById('customer-address').value.trim();
   const reference = document.getElementById('customer-reference').value.trim();
   const notes = document.getElementById('customer-notes').value.trim();
@@ -700,7 +734,7 @@ async function submitOrder(){
   const { data: order, error } = await supabase.from('orders').insert({
     customer_id: currentUser.id,
     customer_name: name,
-    customer_phone: profile?.phone || null,
+    customer_phone: phone || null,
     delivery_type: isDelivery ? 'Delivery' : 'Retirada',
     address: isDelivery ? address : null,
     reference: isDelivery ? reference : null,
@@ -712,6 +746,7 @@ async function submitOrder(){
   }).select().single();
 
   sendOrderBtn.style.pointerEvents = '';
+  // resto da função continua igual (tratamento de erro + WhatsApp + redirect)
 
   if(error){
     alert('Não foi possível enviar o pedido. Tente novamente.');
