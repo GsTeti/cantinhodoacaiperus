@@ -52,7 +52,7 @@ async function checkAdminAndInit(){
 
   loadStoreStatus();
   loadStock();
-  loadOrders('active');
+  loadOrders('delivery');
   subscribeRealtime();
   tryReconnectPrinter();
 }
@@ -124,7 +124,7 @@ function renderStockGroup(title, items, table){
 
 // ---------- Pedidos ----------
 const ordersPanelList = document.getElementById('orders-panel-list');
-let currentFilter = 'active';
+let currentFilter = 'delivery';
 
 document.querySelectorAll('#order-filter-tabs .app-tab').forEach(tab => {
   tab.addEventListener('click', () => {
@@ -167,12 +167,11 @@ function showAdminModal({ message, withInput=false, placeholder='', confirmText=
 
 async function loadOrders(filter){
   let query = supabase.from('orders').select('*').order('created_at', { ascending:false });
-  if(filter === 'active') query = query.in('status', ['pending','accepted','preparing','on_the_way']);
+  if(filter === 'delivery') query = query.in('status', ['pending','accepted','preparing','on_the_way']).eq('delivery_type', 'Delivery');
+  else if(filter === 'pickup') query = query.in('status', ['pending','accepted','preparing','on_the_way']).eq('delivery_type', 'Retirada');
   else query = query.eq('status', filter);
 
   const { data, error } = await query;
-
-  renderDailyTotals(filter === 'delivered' ? (data || []) : []);
 
   ordersPanelList.innerHTML = '';
   if(error || !data || data.length === 0){
@@ -182,49 +181,10 @@ async function loadOrders(filter){
   data.forEach(order => renderOrderCard(order));
 }
 
-function renderDailyTotals(orders){
-  const summaryEl = document.getElementById('daily-totals');
-  if(!summaryEl) return;
-  if(!orders || orders.length === 0){ summaryEl.innerHTML = ''; return; }
-
-  const groups = {};
-  orders.forEach(o => {
-    const day = new Date(o.created_at).toLocaleDateString('pt-BR');
-    if(!groups[day]) groups[day] = { total: 0, count: 0 };
-    groups[day].total += Number(o.total);
-    groups[day].count += 1;
-  });
-
-  const days = Object.keys(groups).sort((a, b) => {
-    const [da, ma, ya] = a.split('/').map(Number);
-    const [db, mb, yb] = b.split('/').map(Number);
-    return new Date(yb, mb - 1, db) - new Date(ya, ma - 1, da);
-  });
-
-  const grandTotal = orders.reduce((s, o) => s + Number(o.total), 0);
-
-  summaryEl.innerHTML = `
-    <div class="daily-totals-box">
-      <div class="daily-totals-title">💰 Faturamento por dia</div>
-      ${days.map(day => `
-        <div class="daily-totals-row">
-          <span class="daily-totals-date">${day}</span>
-          <span class="daily-totals-count">${groups[day].count} pedido${groups[day].count > 1 ? 's' : ''}</span>
-          <span class="daily-totals-value">${fmt(groups[day].total)}</span>
-        </div>
-      `).join('')}
-      <div class="daily-totals-row daily-totals-grand">
-        <span class="daily-totals-date">Total geral</span>
-        <span class="daily-totals-count">${orders.length} pedidos</span>
-        <span class="daily-totals-value">${fmt(grandTotal)}</span>
-      </div>
-    </div>
-  `;
-}
-
 function renderOrderCard(order){
-  const st = STATUS_LABELS[order.status] || STATUS_LABELS.pending;
-  const date = new Date(order.created_at).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+	const st = STATUS_LABELS[order.status] || STATUS_LABELS.pending;
+	const statusText = (order.status === 'on_the_way' && order.delivery_type === 'Retirada') ? 'Pronto para retirar' : st.text;
+	const date = new Date(order.created_at).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
   const cupsText = order.cups.map((c,i) => `Copo ${i+1}: ${c.parts.join(', ')}`).join('<br>');
 
   let addressLine = order.delivery_type === 'Delivery'
@@ -241,8 +201,8 @@ function renderOrderCard(order){
         <div class="order-card-id">${date} · ${order.customer_phone ? `<a href="https://wa.me/55${order.customer_phone.replace(/\D/g,'')}" target="_blank">📞 ${order.customer_phone}</a>` : 'sem telefone'}</div>
       </div>
       <div class="order-card-head-right">
-        <span class="status-pill ${st.class}">${st.text}</span>
-        ${order.status === 'cancelled' ? `<button class="order-delete-btn" title="Excluir pedido">✕</button>` : ''}
+        <span class="status-pill ${st.class}">${statusText}</span>  
+        ${['cancelled','delivered'].includes(order.status) ? `<button class="order-delete-btn" title="Excluir pedido">✕</button>` : ''}
       </div>
     </div>
     <div class="order-card-cups">${cupsText}</div>
@@ -256,18 +216,18 @@ function renderOrderCard(order){
       <div class="order-card-actions" id="actions-${order.id}"></div>
     </div>
   `;
-  if(order.status === 'cancelled'){
+  if(['cancelled','delivered'].includes(order.status)){  
     card.querySelector('.order-delete-btn').addEventListener('click', async (e) => {
   e.stopPropagation();
   const ok = await showAdminModal({
-    message: 'Excluir este pedido cancelado? Essa ação não pode ser desfeita.',
+    message: `Excluir este pedido ${order.status === 'delivered' ? 'entregue' : 'cancelado'}? Essa ação não pode ser desfeita.`,
     confirmText: 'Excluir'
   });
   if(!ok) return;
   const { error } = await supabase.from('orders').delete().eq('id', order.id);
   if(error){ alert('Não foi possível excluir.'); return; }
   card.remove();
-});
+});  
   }
 
   ordersPanelList.appendChild(card);
@@ -282,7 +242,10 @@ function renderOrderCard(order){
   // NOVO: cobre pending -> accepted e accepted -> preparing
   if(NEXT_STATUS[order.status] && order.status !== 'preparing'){
     const btn = document.createElement('button');
-    btn.className = 'btn-mini'; btn.textContent = NEXT_LABEL[order.status];
+    btn.className = 'btn-mini';
+    btn.textContent = (order.status === 'on_the_way' && order.delivery_type === 'Retirada')
+      ? '✅ Marcar como retirado'
+      : NEXT_LABEL[order.status];
     btn.addEventListener('click', async () => {
       const wasPending = order.status === 'pending';
       await supabase.from('orders').update({ status: NEXT_STATUS[order.status] }).eq('id', order.id);
@@ -293,19 +256,29 @@ function renderOrderCard(order){
   }
 
   if(order.status === 'preparing'){
-    // pede o tempo estimado antes de marcar "a caminho"
-    const etaInput = document.createElement('input');
-    etaInput.type = 'number'; etaInput.min = '5'; etaInput.placeholder = 'min';
-    etaInput.className = 'eta-input'; etaInput.value = order.eta_minutes || 30;
-    wrap.appendChild(etaInput);
+    if(order.delivery_type === 'Retirada'){
+      const btn = document.createElement('button');
+      btn.className = 'btn-mini'; btn.textContent = '🔔 Pedido pronto para retirar';
+      btn.addEventListener('click', async () => {
+        await supabase.from('orders').update({ status:'on_the_way' }).eq('id', order.id);
+        loadOrders(currentFilter);
+      });
+      wrap.appendChild(btn);
+    } else {
+      // delivery: pede o tempo estimado antes de marcar "a caminho"
+      const etaInput = document.createElement('input');
+      etaInput.type = 'number'; etaInput.min = '5'; etaInput.placeholder = 'min';
+      etaInput.className = 'eta-input'; etaInput.value = order.eta_minutes || 30;
+      wrap.appendChild(etaInput);
 
-    const btn = document.createElement('button');
-    btn.className = 'btn-mini'; btn.textContent = NEXT_LABEL.preparing;
-    btn.addEventListener('click', async () => {
-      await supabase.from('orders').update({ status:'on_the_way', eta_minutes: parseInt(etaInput.value) || 30 }).eq('id', order.id);
-      loadOrders(currentFilter);
-    });
-    wrap.appendChild(btn);
+      const btn = document.createElement('button');
+      btn.className = 'btn-mini'; btn.textContent = NEXT_LABEL.preparing;
+      btn.addEventListener('click', async () => {
+        await supabase.from('orders').update({ status:'on_the_way', eta_minutes: parseInt(etaInput.value) || 30 }).eq('id', order.id);
+        loadOrders(currentFilter);
+      });
+      wrap.appendChild(btn);
+    }
   }
 
   if(['pending','accepted'].includes(order.status)){
@@ -344,32 +317,30 @@ function renderOrderCard(order){
 }
 
 // ---------- Som de notificação de pedido novo ----------
+// ---------- Som de notificação de pedido novo ----------
+let notifyAudioCtx = null;
+function getAudioCtx(){
+  if(!notifyAudioCtx) notifyAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if(notifyAudioCtx.state === 'suspended') notifyAudioCtx.resume();
+  return notifyAudioCtx;
+}
+document.addEventListener('click', () => getAudioCtx(), { once:false });
+
+// ---------- Som de notificação de pedido novo ----------
+const notifyAudio = new Audio('notificacao.mp3'); // ajuste o caminho se colocou em subpasta, ex: 'sons/notification.mp3'
+notifyAudio.volume = 1.0; // 0 a 1 — deixa no máximo
+
+document.addEventListener('click', () => {
+  // "destrava" o áudio no primeiro clique da sessão (política do navegador)
+  notifyAudio.play().then(() => {
+    notifyAudio.pause();
+    notifyAudio.currentTime = 0;
+  }).catch(() => {});
+}, { once: true });
+
 function playNewOrderSound(){
-  try{
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const now = ctx.currentTime;
-
-    const playTone = (freq, start, dur, type='square', vol=0.25) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = type;
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0, now + start);
-      gain.gain.linearRampToValueAtTime(vol, now + start + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + start + dur);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(now + start);
-      osc.stop(now + start + dur + 0.05);
-    };
-
-    // sequência tipo "caixa registradora": bipe duplo grave + "cling" agudo no final
-    playTone(660, 0,    0.12, 'square', 0.28);
-    playTone(660, 0.14, 0.12, 'square', 0.28);
-    playTone(880, 0.30, 0.10, 'square', 0.25);
-    playTone(1320, 0.42, 0.35, 'triangle', 0.22); // o "cling" final, mais brilhante e longo
-  }catch(err){
-    console.warn('Não foi possível tocar o som de notificação.', err);
-  }
+  notifyAudio.currentTime = 0; // garante que toca do início mesmo se um pedido chegar em cima do outro
+  notifyAudio.play().catch(err => console.warn('Não foi possível tocar o som de notificação.', err));
 }
 
 // ---------- Tempo real: novos pedidos e mudanças aparecem sem precisar atualizar a página ----------

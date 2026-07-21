@@ -57,21 +57,28 @@ function render(order){
 
   const currentIndex = STEP_INDEX[order.status] ?? 0;
   const current = STEPS[currentIndex];
+  const isPickup = order.delivery_type === 'Retirada';
 
   const stepsHtml = STEPS.map((step, i) => {
     let cls = '';
     if(i < currentIndex) cls = 'done';
     else if(i === currentIndex) cls = 'current';
     const icon = i < currentIndex ? '✓' : (i === currentIndex ? '●' : '');
+    let title = step.title;
     let sub = step.sub;
-    if(step.key === 'on_the_way' && order.eta_minutes && i <= currentIndex){
-      sub = `Chegada estimada: ~${order.eta_minutes} min`;
+    if(step.key === 'on_the_way'){
+      if(isPickup){
+        title = 'Pronto para retirar';
+        sub = 'Pode vir buscar seu pedido na loja';
+      } else if(order.eta_minutes && i <= currentIndex){
+        sub = `Chegada estimada: ~${order.eta_minutes} min`;
+      }
     }
     return `
       <div class="tracker-step ${cls}">
         <div class="tracker-step-dot">${icon}</div>
         <div class="tracker-step-text">
-          <div class="tracker-step-title">${step.title}</div>
+          <div class="tracker-step-title">${title}</div>
           <div class="tracker-step-sub">${sub}</div>
         </div>
       </div>`;
@@ -79,12 +86,23 @@ function render(order){
 
   const cupsText = order.cups.map((c,i) => `Copo ${i+1}: ${c.parts.join(', ')} — ${fmt(c.total)}`).join('<br>');
 
+  let bigTitle = current.title;
+  let bigSub = current.sub;
+  if(order.status === 'on_the_way'){
+    if(isPickup){
+      bigTitle = 'Pronto para retirar';
+      bigSub = 'Pode vir buscar seu pedido na loja';
+    } else if(order.eta_minutes){
+      bigSub = `Chegada estimada: ~${order.eta_minutes} min`;
+    }
+  }
+
   content.innerHTML = `
     <div class="tracker-card">
       <div class="tracker-status-big">
         <div class="emoji">🫐</div>
-        <h2>${current.title}</h2>
-        <p>${order.status === 'on_the_way' && order.eta_minutes ? 'Chegada estimada: ~' + order.eta_minutes + ' min' : current.sub}</p>
+        <h2>${bigTitle}</h2>
+        <p>${bigSub}</p>
       </div>
       <div class="tracker-steps">${stepsHtml}</div>
       <div class="tracker-order-summary">

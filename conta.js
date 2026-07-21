@@ -163,6 +163,7 @@ async function loadOrders(){
   }
   data.forEach(order => {
   const st = STATUS_LABELS[order.status] || STATUS_LABELS.pending;
+  const statusText = (order.status === 'on_the_way' && order.delivery_type === 'Retirada') ? 'Pronto para retirar' : st.text;
   const date = new Date(order.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
   const cupsText = order.cups.map(c => c.parts.join(', ')).join(' • ');
   const canRepeat = order.cups.every(c => {
@@ -176,7 +177,7 @@ async function loadOrders(){
     <div class="list-card-main">
       <div class="list-card-title">${date} — ${fmt(order.total)}</div>
       <div class="list-card-sub">${cupsText}</div>
-      <div style="margin-top:8px;"><span class="status-pill ${st.class}">${st.text}</span></div>
+      <div style="margin-top:8px;"><span class="status-pill ${st.class}">${statusText}</span></div>
     </div>
     ${canRepeat ? `<div class="list-card-actions"><button type="button" class="app-btn-outline" data-repeat="${order.id}" style="padding:8px 14px; font-size:0.85rem;">🔁 Repetir</button></div>` : ''}
   `;
